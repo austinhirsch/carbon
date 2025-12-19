@@ -6,12 +6,11 @@ import { useRef } from "react";
 import { LuBan } from "react-icons/lu";
 import { cn } from "..";
 import { HStack } from "../HStack";
-import { useOutsideClick } from "../hooks";
 import { InputGroup } from "../Input";
+import { Popover, PopoverContent, PopoverTrigger } from "../Popover";
 import { FieldButton } from "./components/Button";
 import { Calendar } from "./components/Calendar";
 import DateField from "./components/DateField";
-import { Popover } from "./components/Popover";
 import TimeField from "./TimePicker";
 
 const DateTimePicker = (
@@ -28,41 +27,40 @@ const DateTimePicker = (
   const { groupProps, fieldProps, buttonProps, dialogProps, calendarProps } =
     useDatePicker(props, state, ref);
 
-  useOutsideClick({
-    ref,
-    handler: () => state.setOpen(false)
-  });
-
   return (
-    <div className="relative inline-flex flex-col w-full">
-      <HStack className="w-full" spacing={0}>
-        <InputGroup
-          {...groupProps}
-          ref={ref}
-          className={cn("w-full inline-flex rounded-r-none", props.className)}
-        >
-          <div className="flex w-full px-4 py-2">
-            <DateField {...fieldProps} />
-            {state.isInvalid && (
-              <LuBan className="!text-destructive-foreground absolute right-[12px] top-[12px]" />
+    <Popover open={state.isOpen} onOpenChange={state.setOpen}>
+      <div className="relative inline-flex flex-col w-full">
+        <HStack className="w-full" spacing={0}>
+          <InputGroup
+            {...groupProps}
+            ref={ref}
+            className={cn("w-full inline-flex", props.className)}
+          >
+            <div className="flex w-full px-4 py-2">
+              <DateField {...fieldProps} />
+              {state.isInvalid && (
+                <LuBan className="!text-destructive-foreground absolute right-[12px] top-[12px]" />
+              )}
+            </div>
+            {props.withButton !== false && (
+              <div className="flex-shrink-0 -mt-px">
+                <PopoverTrigger tabIndex={-1}>
+                  <FieldButton {...buttonProps} isPressed={state.isOpen} />
+                </PopoverTrigger>
+              </div>
             )}
-          </div>
-        </InputGroup>
-        {props.withButton !== false && (
-          <FieldButton {...buttonProps} isPressed={state.isOpen} />
-        )}
-      </HStack>
-      {state.isOpen && (
-        <Popover {...dialogProps} onClose={() => state.setOpen(false)}>
+          </InputGroup>
+        </HStack>
+        <PopoverContent align="end" {...dialogProps}>
           <Calendar {...calendarProps} />
           <TimeField
             label="Time"
             value={state.timeValue}
             onChange={state.setTimeValue}
           />
-        </Popover>
-      )}
-    </div>
+        </PopoverContent>
+      </div>
+    </Popover>
   );
 };
 

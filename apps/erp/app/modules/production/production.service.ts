@@ -1584,17 +1584,11 @@ export async function getMaintenanceDispatches(
 ) {
   let query = client
     .from("maintenanceDispatch")
-    .select(
-      `id, status, priority, severity, source, isFailure,
-       plannedStartTime, plannedEndTime, actualStartTime, actualEndTime, duration,
-       assignee:user!maintenanceDispatch_assignee_fkey(id, fullName, avatarUrl),
-       createdAt`,
-      { count: "exact" }
-    )
+    .select(`*`, { count: "exact" })
     .eq("companyId", companyId);
 
   if (args?.search) {
-    query = query.ilike("id", `%${args.search}%`);
+    query = query.ilike("maintenanceDispatchId", `%${args.search}%`);
   }
 
   if (args) {
@@ -2644,6 +2638,7 @@ export async function upsertMaintenanceDispatch(
   client: SupabaseClient<Database>,
   dispatch:
     | (Omit<z.infer<typeof maintenanceDispatchValidator>, "id"> & {
+        maintenanceDispatchId: string;
         companyId: string;
         createdBy: string;
         content?: Json;

@@ -1,3 +1,4 @@
+-- Maintenance dispatch status enum
 DO $$ BEGIN
     CREATE TYPE "maintenanceDispatchStatus" AS ENUM (
       'Open',
@@ -10,6 +11,55 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
+-- Maintenance dispatch priority enum
+DO $$ BEGIN
+    CREATE TYPE "maintenanceDispatchPriority" AS ENUM (
+      'Low',
+      'Medium',
+      'High',
+      'Critical'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Maintenance severity enum
+DO $$ BEGIN
+    CREATE TYPE "maintenanceSeverity" AS ENUM (
+      'Preventive',
+      'OPM',
+      'Maintenance Required',
+      'OEM Required'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Maintenance source enum
+DO $$ BEGIN
+    CREATE TYPE "maintenanceSource" AS ENUM (
+      'Scheduled',
+      'Reactive',
+      'Non-Conformance'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Maintenance frequency enum
+DO $$ BEGIN
+  CREATE TYPE "maintenanceFrequency" AS ENUM (
+    'Daily',
+    'Weekly',
+    'Monthly',
+    'Quarterly',
+    'Annual'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
+-- Failure mode catalog
 CREATE TABLE "maintenanceFailureMode" (
   "id" TEXT NOT NULL DEFAULT id(),
   "name" TEXT NOT NULL,
@@ -65,40 +115,78 @@ CREATE POLICY "DELETE" ON "maintenanceFailureMode"
     )
   );
 
-DO $$ BEGIN
-    CREATE TYPE "maintenanceDispatchPriority" AS ENUM (
-      'Low',
-      'Medium',
-      'High',
-      'Critical'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+-- Maintenance schedule table (must be created before maintenanceDispatch)
+CREATE TABLE IF NOT EXISTS "maintenanceSchedule" (
+  "id" TEXT NOT NULL DEFAULT id(),
+  "name" TEXT NOT NULL,
+  "description" TEXT,
+  "workCenterId" TEXT NOT NULL,
+  "frequency" "maintenanceFrequency" NOT NULL,
+  "priority" "maintenanceDispatchPriority" NOT NULL DEFAULT 'Medium',
+  "estimatedDuration" INTEGER,
+  "active" BOOLEAN NOT NULL DEFAULT true,
+  "lastGeneratedAt" TIMESTAMP WITH TIME ZONE,
+  "nextDueAt" TIMESTAMP WITH TIME ZONE,
+  "companyId" TEXT NOT NULL,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
 
-DO $$ BEGIN
-    CREATE TYPE "maintenanceSeverity" AS ENUM (
-      'Preventive',
-      'OPM',
-      'Maintenance Required',
-      'OEM Required'
-    );
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+  CONSTRAINT "maintenanceSchedule_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "maintenanceSchedule_workCenterId_fkey" FOREIGN KEY ("workCenterId") REFERENCES "workCenter"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceSchedule_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceSchedule_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceSchedule_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
+CREATE INDEX IF NOT EXISTS "maintenanceSchedule_workCenterId_idx" ON "maintenanceSchedule" ("workCenterId");
+CREATE INDEX IF NOT EXISTS "maintenanceSchedule_companyId_idx" ON "maintenanceSchedule" ("companyId");
+CREATE INDEX IF NOT EXISTS "maintenanceSchedule_active_idx" ON "maintenanceSchedule" ("active");
+
+-- Maintenance schedule items (parts required for scheduled maintenance)
+CREATE TABLE IF NOT EXISTS "maintenanceScheduleItem" (
+  "id" TEXT NOT NULL DEFAULT id(),
+  "maintenanceScheduleId" TEXT NOT NULL,
+  "itemId" TEXT NOT NULL,
+  "quantity" INTEGER NOT NULL,
+  "unitOfMeasureCode" TEXT NOT NULL,
+  "companyId" TEXT NOT NULL,
+  "createdBy" TEXT NOT NULL,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "updatedBy" TEXT,
+  "updatedAt" TIMESTAMP WITH TIME ZONE,
+
+  CONSTRAINT "maintenanceScheduleItem_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "maintenanceScheduleItem_maintenanceScheduleId_fkey" FOREIGN KEY ("maintenanceScheduleId") REFERENCES "maintenanceSchedule"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceScheduleItem_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "item"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceScheduleItem_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceScheduleItem_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceScheduleItem_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS "maintenanceScheduleItem_maintenanceScheduleId_idx" ON "maintenanceScheduleItem" ("maintenanceScheduleId");
+CREATE INDEX IF NOT EXISTS "maintenanceScheduleItem_itemId_idx" ON "maintenanceScheduleItem" ("itemId");
+CREATE INDEX IF NOT EXISTS "maintenanceScheduleItem_companyId_idx" ON "maintenanceScheduleItem" ("companyId");
+
+-- Main dispatch table
 CREATE TABLE "maintenanceDispatch" (
-  "id" TEXT NOT NULL DEFAULT id('dispatch'),
+  "id" TEXT NOT NULL DEFAULT id('main'),
+  "maintenanceDispatchId" TEXT NOT NULL,
   "content" JSON NOT NULL DEFAULT '{}',
   "status" "maintenanceDispatchStatus" NOT NULL DEFAULT 'Open',
   "priority" "maintenanceDispatchPriority" NOT NULL DEFAULT 'Medium',
+  "source" "maintenanceSource" NOT NULL DEFAULT 'Reactive',
   "severity" "maintenanceSeverity",
+  "workCenterId" TEXT,
+  "maintenanceScheduleId" TEXT,
   "suspectedFailureModeId" TEXT,
   "actualFailureModeId" TEXT,
   "plannedStartTime" TIMESTAMP WITH TIME ZONE,
   "plannedEndTime" TIMESTAMP WITH TIME ZONE,
   "actualStartTime" TIMESTAMP WITH TIME ZONE,
   "actualEndTime" TIMESTAMP WITH TIME ZONE,
+  "isFailure" BOOLEAN NOT NULL DEFAULT false,
   "duration" INTEGER GENERATED ALWAYS AS (
     CASE
       WHEN "actualEndTime" IS NULL THEN 0
@@ -106,6 +194,7 @@ CREATE TABLE "maintenanceDispatch" (
     END
   ) STORED,
   "nonConformanceId" TEXT,
+  "completedAt" TIMESTAMP WITH TIME ZONE,
   "assignee" TEXT,
   "companyId" TEXT NOT NULL,
   "createdBy" TEXT NOT NULL,
@@ -115,9 +204,11 @@ CREATE TABLE "maintenanceDispatch" (
 
   CONSTRAINT "maintenanceDispatch_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "maintenanceDispatch_assignee_fkey" FOREIGN KEY ("assignee") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceDispatch_maintenanceScheduleId_fkey" FOREIGN KEY ("maintenanceScheduleId") REFERENCES "maintenanceSchedule"("id") ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_suspectedFailureModeId_fkey" FOREIGN KEY ("suspectedFailureModeId") REFERENCES "maintenanceFailureMode"("id") ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_actualFailureModeId_fkey" FOREIGN KEY ("actualFailureModeId") REFERENCES "maintenanceFailureMode"("id") ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_nonConformanceId_fkey" FOREIGN KEY ("nonConformanceId") REFERENCES "nonConformance"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT "maintenanceDispatch_workCenterId_fkey" FOREIGN KEY ("workCenterId") REFERENCES "workCenter"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "maintenanceDispatch_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -126,6 +217,7 @@ CREATE TABLE "maintenanceDispatch" (
 CREATE INDEX "maintenanceDispatch_status_idx" ON "maintenanceDispatch" ("status");
 CREATE INDEX "maintenanceDispatch_companyId_idx" ON "maintenanceDispatch" ("companyId");
 
+-- Time tracking events
 CREATE TABLE "maintenanceDispatchEvent" (
   "id" TEXT NOT NULL DEFAULT id(),
   "maintenanceDispatchId" TEXT NOT NULL,
@@ -159,6 +251,7 @@ CREATE INDEX "maintenanceDispatchEvent_maintenanceDispatchId_idx" ON "maintenanc
 CREATE INDEX "maintenanceDispatchEvent_employeeId_idx" ON "maintenanceDispatchEvent" ("employeeId");
 CREATE INDEX "maintenanceDispatchEvent_companyId_idx" ON "maintenanceDispatchEvent" ("companyId");
 
+-- Comments on dispatches
 CREATE TABLE "maintenanceDispatchComment" (
   "id" TEXT NOT NULL DEFAULT id(),
   "maintenanceDispatchId" TEXT NOT NULL,
@@ -178,6 +271,7 @@ CREATE TABLE "maintenanceDispatchComment" (
 
 CREATE INDEX "maintenanceDispatchComment_maintenanceDispatchId_idx" ON "maintenanceDispatchComment" ("maintenanceDispatchId");
 
+-- Work centers involved in dispatch
 CREATE TABLE "maintenanceDispatchWorkCenter" (
   "id" TEXT NOT NULL DEFAULT id(),
   "maintenanceDispatchId" TEXT NOT NULL,
@@ -200,12 +294,15 @@ CREATE INDEX "maintenanceDispatchWorkCenter_maintenanceDispatchId_idx" ON "maint
 CREATE INDEX "maintenanceDispatchWorkCenter_workCenterId_idx" ON "maintenanceDispatchWorkCenter" ("workCenterId");
 CREATE INDEX "maintenanceDispatchWorkCenter_companyId_idx" ON "maintenanceDispatchWorkCenter" ("companyId");
 
+-- Parts/materials consumed
 CREATE TABLE "maintenanceDispatchItem" (
   "id" TEXT NOT NULL DEFAULT id(),
   "maintenanceDispatchId" TEXT NOT NULL,
   "itemId" TEXT NOT NULL,
   "quantity" INTEGER NOT NULL,
   "unitOfMeasureCode" TEXT NOT NULL,
+  "unitCost" NUMERIC,
+  "totalCost" NUMERIC GENERATED ALWAYS AS ("quantity" * "unitCost") STORED,
   "companyId" TEXT NOT NULL,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -224,6 +321,7 @@ CREATE INDEX "maintenanceDispatchItem_maintenanceDispatchId_idx" ON "maintenance
 CREATE INDEX "maintenanceDispatchItem_itemId_idx" ON "maintenanceDispatchItem" ("itemId");
 CREATE INDEX "maintenanceDispatchItem_companyId_idx" ON "maintenanceDispatchItem" ("companyId");
 
+-- Standard replacement parts for work centers
 CREATE TABLE "workCenterReplacementPart" (
   "id" TEXT NOT NULL DEFAULT id(),
   "workCenterId" TEXT NOT NULL,
@@ -247,3 +345,33 @@ CREATE TABLE "workCenterReplacementPart" (
 CREATE INDEX "workCenterReplacementPart_workCenterId_idx" ON "workCenterReplacementPart" ("workCenterId");
 CREATE INDEX "workCenterReplacementPart_itemId_idx" ON "workCenterReplacementPart" ("itemId");
 CREATE INDEX "workCenterReplacementPart_companyId_idx" ON "workCenterReplacementPart" ("companyId");
+
+-- Company settings for maintenance scheduling
+ALTER TABLE "companySettings"
+  ADD COLUMN IF NOT EXISTS "maintenanceGenerateInAdvance" BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE "companySettings"
+  ADD COLUMN IF NOT EXISTS "maintenanceAdvanceDays" INTEGER NOT NULL DEFAULT 7;
+
+-- salesRfq sequence for existing companies
+INSERT INTO "sequence" (
+  "table", 
+  "name", 
+  "prefix", 
+  "suffix", 
+  "next", 
+  "size", 
+  "step", 
+  "companyId"
+) 
+SELECT 
+  'maintenanceDispatch',
+  'Maintenance Dispatch',
+  'MAIN',
+  null,
+  0,
+  6,
+  1,
+  id
+FROM "company" 
+ON CONFLICT DO NOTHING;

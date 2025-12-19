@@ -87,9 +87,9 @@ export const maintenanceSeverity = [
 ] as const;
 
 export const maintenanceSource = [
-  "scheduled",
-  "reactive",
-  "non-conformance"
+  "Scheduled",
+  "Reactive",
+  "Non-Conformance"
 ] as const;
 
 export const procedureStatus = ["Draft", "Active", "Archived"] as const;
@@ -895,13 +895,15 @@ export const maintenanceDispatchValidator = z.object({
   priority: z.enum(maintenanceDispatchPriority),
   severity: z.enum(maintenanceSeverity).optional(),
   source: z.enum(maintenanceSource).optional(),
+  workCenterId: zfd.text(z.string().optional()),
   suspectedFailureModeId: zfd.text(z.string().optional()),
   actualFailureModeId: zfd.text(z.string().optional()),
   plannedStartTime: zfd.text(z.string().optional()),
   plannedEndTime: zfd.text(z.string().optional()),
   assignee: zfd.text(z.string().optional()),
   nonConformanceId: zfd.text(z.string().optional()),
-  isFailure: z.boolean().optional()
+  isFailure: z.boolean().optional(),
+  content: zfd.text(z.string().optional())
 });
 
 export const maintenanceDispatchCommentValidator = z.object({

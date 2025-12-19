@@ -993,7 +993,7 @@ export const path = {
       generatePath(`${x}/job/${jobId}/materials/session/new`),
     newKanban: `${x}/inventory/kanbans/new`,
     newLocation: `${x}/resources/locations/new`,
-    newMaintenanceDispatch: `${x}/production/maintenance/new`,
+    newMaintenanceDispatch: `${x}/maintenance/new`,
     newMaintenanceSchedule: `${x}/production/maintenance-schedules/new`,
     newMakeMethodVersion: `${x}/items/methods/version/new`,
     newMaterial: `${x}/material/new`,

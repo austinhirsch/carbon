@@ -1834,6 +1834,15 @@ export const sequences = [
     next: 0,
   },
   {
+    table: "maintenanceDispatch",
+    name: "Maintenance Dispatch",
+    prefix: "MAIN",
+    suffix: null,
+    next: 0,
+    size: 6,
+    step: 1,
+  },
+  {
     table: "nonConformance",
     name: "Issue",
     prefix: "NCR",
