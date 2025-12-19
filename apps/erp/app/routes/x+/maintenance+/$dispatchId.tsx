@@ -10,11 +10,11 @@ import {
   getMaintenanceDispatch,
   getMaintenanceDispatchComments,
   getMaintenanceDispatchEvents,
-  getMaintenanceDispatchItems,
-  getMaintenanceDispatchWorkCenters
+  getMaintenanceDispatchItems
 } from "~/modules/production";
 import {
   MaintenanceDispatchExplorer,
+  MaintenanceDispatchFiles,
   MaintenanceDispatchHeader,
   MaintenanceDispatchNotes,
   MaintenanceDispatchProperties
@@ -28,6 +28,17 @@ export const handle: Handle = {
   module: "production"
 };
 
+async function getMaintenanceDispatchFiles(
+  client: Parameters<typeof getMaintenanceDispatch>[0],
+  companyId: string,
+  dispatchId: string
+) {
+  const result = await client.storage
+    .from("private")
+    .list(`${companyId}/maintenance/${dispatchId}`);
+  return result.data || [];
+}
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const { client, companyId } = await requirePermissions(request, {
     view: "production"
@@ -36,15 +47,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const { dispatchId } = params;
   if (!dispatchId) throw new Error("Could not find dispatchId");
 
-  const [dispatch, events, items, workCenters, comments, failureModes] =
-    await Promise.all([
-      getMaintenanceDispatch(client, dispatchId),
-      getMaintenanceDispatchEvents(client, dispatchId),
-      getMaintenanceDispatchItems(client, dispatchId),
-      getMaintenanceDispatchWorkCenters(client, dispatchId),
-      getMaintenanceDispatchComments(client, dispatchId),
-      getFailureModesList(client, companyId)
-    ]);
+  const [dispatch, events, items, comments, failureModes] = await Promise.all([
+    getMaintenanceDispatch(client, dispatchId),
+    getMaintenanceDispatchEvents(client, dispatchId),
+    getMaintenanceDispatchItems(client, dispatchId),
+    getMaintenanceDispatchComments(client, dispatchId),
+    getFailureModesList(client, companyId)
+  ]);
 
   if (dispatch.error) {
     throw redirect(
@@ -60,16 +69,15 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     dispatch: dispatch.data,
     events: events.data ?? [],
     items: items.data ?? [],
-    workCenters: workCenters.data ?? [],
     comments: comments.data ?? [],
-    failureModes: failureModes.data ?? []
+    failureModes: failureModes.data ?? [],
+    files: getMaintenanceDispatchFiles(client, companyId, dispatchId)
   };
 }
 
 export default function MaintenanceDispatchRoute() {
   const { dispatchId } = useParams();
-  const { dispatch, events, items, workCenters } =
-    useLoaderData<typeof loader>();
+  const { dispatch, events, items, files } = useLoaderData<typeof loader>();
 
   if (!dispatchId) throw new Error("Could not find dispatchId");
 
@@ -83,11 +91,7 @@ export default function MaintenanceDispatchRoute() {
           <div className="flex flex-grow overflow-hidden">
             <ResizablePanels
               explorer={
-                <MaintenanceDispatchExplorer
-                  items={items}
-                  events={events}
-                  workCenters={workCenters}
-                />
+                <MaintenanceDispatchExplorer items={items} events={events} />
               }
               content={
                 <div className="h-[calc(100dvh-99px)] overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent w-full">
@@ -95,6 +99,11 @@ export default function MaintenanceDispatchRoute() {
                     <MaintenanceDispatchNotes
                       id={dispatchId}
                       content={(dispatch?.content ?? {}) as JSONContent}
+                      isDisabled={isCompleted}
+                    />
+                    <MaintenanceDispatchFiles
+                      dispatchId={dispatchId}
+                      files={files}
                       isDisabled={isCompleted}
                     />
                     <Outlet />

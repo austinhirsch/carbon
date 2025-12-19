@@ -20,14 +20,16 @@ import type { z } from "zod/v3";
 import { HighPriorityIcon } from "~/assets/icons/HighPriorityIcon";
 import { LowPriorityIcon } from "~/assets/icons/LowPriorityIcon";
 import { MediumPriorityIcon } from "~/assets/icons/MediumPriorityIcon";
-import { Hidden, Submit, WorkCenter } from "~/components/Form";
+import { Employee, Hidden, Submit, WorkCenter } from "~/components/Form";
 import { usePermissions, useUser } from "~/hooks";
 import { getPrivateUrl, path } from "~/utils/path";
 import {
   maintenanceDispatchPriority,
   maintenanceDispatchValidator,
+  maintenanceSeverity,
   maintenanceSource
 } from "../../production.models";
+import MaintenanceSeverity from "./MaintenanceSeverity";
 import MaintenanceSource from "./MaintenanceSource";
 
 function getPriorityIcon(
@@ -135,6 +137,14 @@ const MaintenanceDispatchForm = ({
                   label: <MaintenanceSource source={source} />
                 }))}
               />
+              <Select
+                name="severity"
+                label="Severity"
+                options={maintenanceSeverity.map((severity) => ({
+                  value: severity,
+                  label: <MaintenanceSeverity severity={severity} />
+                }))}
+              />
               <WorkCenter name="workCenterId" label="Work Center" />
               <Select
                 name="suspectedFailureModeId"
@@ -145,6 +155,7 @@ const MaintenanceDispatchForm = ({
                 }))}
                 isClearable
               />
+              <Employee name="assignee" label="Assignee" />
               <DateTimePicker
                 name="plannedStartTime"
                 label="Planned Start Time"

@@ -863,10 +863,19 @@ export const path = {
       generatePath(`${x}/maintenance/${id}/events`),
     maintenanceDispatchItems: (id: string) =>
       generatePath(`${x}/maintenance/${id}/items`),
-    maintenanceDispatchProperties: (id: string) =>
-      generatePath(`${x}/maintenance/${id}/properties`),
+    maintenanceDispatchStatus: (id: string) =>
+      generatePath(`${x}/maintenance/${id}/status`),
+    maintenanceDispatchUpdate: `${x}/maintenance/update`,
     maintenanceDispatchWorkCenters: (id: string) =>
       generatePath(`${x}/maintenance/${id}/work-centers`),
+    newMaintenanceDispatchItem: (dispatchId: string) =>
+      generatePath(`${x}/maintenance/${dispatchId}/item/new`),
+    deleteMaintenanceDispatchItem: (dispatchId: string, itemId: string) =>
+      generatePath(`${x}/maintenance/${dispatchId}/item/${itemId}/delete`),
+    newMaintenanceDispatchEvent: (dispatchId: string) =>
+      generatePath(`${x}/maintenance/${dispatchId}/event/new`),
+    deleteMaintenanceDispatchEvent: (dispatchId: string, eventId: string) =>
+      generatePath(`${x}/maintenance/${dispatchId}/event/${eventId}/delete`),
     maintenanceDispatches: `${x}/production/maintenance`,
     maintenanceSchedule: (id: string) =>
       generatePath(`${x}/production/maintenance-schedules/${id}`),

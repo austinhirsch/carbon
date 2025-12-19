@@ -4,6 +4,7 @@ import { flash } from "@carbon/auth/session.server";
 import { validationError, validator } from "@carbon/form";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import { redirect, useLoaderData } from "react-router";
+import { useUser } from "~/hooks";
 import {
   getFailureModesList,
   maintenanceDispatchValidator,
@@ -70,13 +71,13 @@ export async function action({ request }: ActionFunctionArgs) {
     maintenanceDispatchId: nextSequence.data,
     status: validation.data.status,
     priority: validation.data.priority,
-    severity: validation.data.severity || null,
+    severity: validation.data.severity || "Maintenance Required",
     source: validation.data.source || "Reactive",
-    workCenterId: validation.data.workCenterId || null,
-    assignee: validation.data.assignee || null,
-    suspectedFailureModeId: validation.data.suspectedFailureModeId || null,
-    plannedStartTime: validation.data.plannedStartTime || null,
-    plannedEndTime: validation.data.plannedEndTime || null,
+    workCenterId: validation.data.workCenterId || undefined,
+    assignee: validation.data.assignee || undefined,
+    suspectedFailureModeId: validation.data.suspectedFailureModeId || undefined,
+    plannedStartTime: validation.data.plannedStartTime || undefined,
+    plannedEndTime: validation.data.plannedEndTime || undefined,
     content,
     companyId,
     createdBy: userId
@@ -109,10 +110,14 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function NewMaintenanceDispatchRoute() {
   const { failureModes } = useLoaderData<typeof loader>();
 
+  const { id: userId } = useUser();
+
   const initialValues = {
     status: "Open" as const,
     priority: "Medium" as const,
-    source: "Reactive" as const
+    source: "Reactive" as const,
+    severity: "Maintenance Required" as const,
+    assignee: userId
   };
 
   return (

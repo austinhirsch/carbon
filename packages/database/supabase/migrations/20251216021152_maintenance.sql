@@ -27,7 +27,7 @@ END $$;
 DO $$ BEGIN
     CREATE TYPE "maintenanceSeverity" AS ENUM (
       'Preventive',
-      'OPM',
+      'Operator Perfomed',
       'Maintenance Required',
       'OEM Required'
     );

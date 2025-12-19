@@ -1,4 +1,4 @@
-import { DatePicker, Select, Switch, ValidatedForm } from "@carbon/form";
+import { Boolean, DatePicker, Select, ValidatedForm } from "@carbon/form";
 import {
   Button,
   HStack,
@@ -28,6 +28,8 @@ import {
 } from "../../production.models";
 import type { MaintenanceDispatchDetail } from "../../types";
 import MaintenancePriority from "./MaintenancePriority";
+import MaintenanceSeverity from "./MaintenanceSeverity";
+import MaintenanceSource from "./MaintenanceSource";
 import MaintenanceStatus from "./MaintenanceStatus";
 
 const MaintenanceDispatchProperties = () => {
@@ -62,11 +64,12 @@ const MaintenanceDispatchProperties = () => {
   const onUpdate = useCallback(
     (field: string, value: string | null) => {
       const formData = new FormData();
+      formData.append("ids", dispatchId);
       formData.append("field", field);
       formData.append("value", value?.toString() ?? "");
       fetcher.submit(formData, {
         method: "post",
-        action: path.to.maintenanceDispatchProperties(dispatchId)
+        action: path.to.maintenanceDispatchUpdate
       });
     },
     [dispatchId, fetcher]
@@ -127,7 +130,11 @@ const MaintenanceDispatchProperties = () => {
                   aria-label="Copy"
                   size="sm"
                   className="p-1"
-                  onClick={() => copyToClipboard(routeData?.dispatch?.id ?? "")}
+                  onClick={() =>
+                    copyToClipboard(
+                      routeData?.dispatch?.maintenanceDispatchId ?? ""
+                    )
+                  }
                 >
                   <LuCopy className="w-3 h-3" />
                 </Button>
@@ -139,7 +146,7 @@ const MaintenanceDispatchProperties = () => {
           </HStack>
         </HStack>
         <span className="text-sm tracking-tight">
-          {routeData?.dispatch?.id}
+          {routeData?.dispatch?.maintenanceDispatchId}
         </span>
       </VStack>
 
@@ -173,7 +180,14 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
           label="Work Center"
           name="workCenterId"
-          inline
+          inline={(value) => {
+            return (
+              <span>
+                {workCenterOptions.find((option) => option.value === value)
+                  ?.label ?? ""}
+              </span>
+            );
+          }}
           isClearable
           onChange={(value) => {
             onUpdate("workCenterId", value?.value ?? null);
@@ -234,7 +248,13 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
           label="Severity"
           name="severity"
-          inline
+          inline={(value) => {
+            return (
+              <MaintenanceSeverity
+                severity={value as (typeof maintenanceSeverity)[number]}
+              />
+            );
+          }}
           onChange={(value) => {
             if (value) {
               onUpdate("severity", value.value);
@@ -260,7 +280,13 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
           label="Source"
           name="source"
-          inline
+          inline={(value) => {
+            return (
+              <MaintenanceSource
+                source={value as (typeof maintenanceSource)[number]}
+              />
+            );
+          }}
           onChange={(value) => {
             if (value) {
               onUpdate("source", value.value);
@@ -318,9 +344,10 @@ const MaintenanceDispatchProperties = () => {
         })}
         className="w-full"
       >
-        <Switch
+        <Boolean
           name="isFailure"
-          label="Is Failure"
+          label="Failure"
+          variant="small"
           isDisabled={!permissions.can("update", "production")}
           onChange={(checked) => {
             onUpdate("isFailure", checked.toString());
@@ -346,7 +373,14 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
           label="Suspected Failure Mode"
           name="suspectedFailureModeId"
-          inline
+          inline={(value) => {
+            return (
+              <span>
+                {routeData?.failureModes.find((mode) => mode.id === value)
+                  ?.name ?? ""}
+              </span>
+            );
+          }}
           isClearable
           onChange={(value) => {
             onUpdate("suspectedFailureModeId", value?.value ?? null);
@@ -371,7 +405,14 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
           label="Actual Failure Mode"
           name="actualFailureModeId"
-          inline
+          inline={(value) => {
+            return (
+              <span>
+                {routeData?.failureModes.find((mode) => mode.id === value)
+                  ?.name ?? ""}
+              </span>
+            );
+          }}
           isClearable
           onChange={(value) => {
             onUpdate("actualFailureModeId", value?.value ?? null);

@@ -46,11 +46,11 @@ const MaintenanceDispatchHeader = () => {
           <HStack>
             <Link to={path.to.maintenanceDispatch(dispatchId)}>
               <Heading size="h4" className="flex items-center gap-2">
-                <span>{routeData?.dispatch?.id}</span>
+                <span>{routeData?.dispatch?.maintenanceDispatchId}</span>
               </Heading>
             </Link>
             <MaintenanceStatus status={status} />
-            <Copy text={routeData?.dispatch?.id ?? ""} />
+            <Copy text={routeData?.dispatch?.maintenanceDispatchId ?? ""} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <IconButton
@@ -80,7 +80,7 @@ const MaintenanceDispatchHeader = () => {
         <HStack>
           <statusFetcher.Form
             method="post"
-            action={path.to.maintenanceDispatchProperties(dispatchId)}
+            action={path.to.maintenanceDispatchStatus(dispatchId)}
           >
             <input type="hidden" name="status" value="In Progress" />
             <Button
@@ -107,7 +107,7 @@ const MaintenanceDispatchHeader = () => {
 
           <statusFetcher.Form
             method="post"
-            action={path.to.maintenanceDispatchProperties(dispatchId)}
+            action={path.to.maintenanceDispatchStatus(dispatchId)}
           >
             <input type="hidden" name="status" value="Completed" />
             <Button
@@ -130,7 +130,7 @@ const MaintenanceDispatchHeader = () => {
 
           <statusFetcher.Form
             method="post"
-            action={path.to.maintenanceDispatchProperties(dispatchId)}
+            action={path.to.maintenanceDispatchStatus(dispatchId)}
           >
             <input type="hidden" name="status" value="Open" />
             <Button
@@ -152,7 +152,7 @@ const MaintenanceDispatchHeader = () => {
         <ConfirmDelete
           action={path.to.deleteMaintenanceDispatch(dispatchId)}
           isOpen={deleteModal.isOpen}
-          name={routeData?.dispatch?.id!}
+          name={routeData?.dispatch?.maintenanceDispatchId!}
           text={`Are you sure you want to delete this maintenance dispatch? This cannot be undone.`}
           onCancel={() => {
             deleteModal.onClose();

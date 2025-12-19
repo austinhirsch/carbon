@@ -81,7 +81,7 @@ export const maintenanceFrequency = [
 
 export const maintenanceSeverity = [
   "Preventive",
-  "OPM",
+  "Operator Perfomed",
   "Maintenance Required",
   "OEM Required"
 ] as const;
