@@ -139,7 +139,7 @@ const MaintenanceDispatchesTable = memo(
               return <span className="text-muted-foreground">Unassigned</span>;
             }
             const workCenter = workCenters.find(
-              (workCenter) => workCenter.value === workCenterId
+              (wc) => wc.value === workCenterId
             );
             if (!workCenter) {
               return <span className="text-muted-foreground">Unknown</span>;

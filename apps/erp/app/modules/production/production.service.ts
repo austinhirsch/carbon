@@ -1636,7 +1636,7 @@ export async function getMaintenanceDispatchItems(
   return client
     .from("maintenanceDispatchItem")
     .select(
-      `id, quantity, unitOfMeasureCode, unitCost, totalCost,
+      `id, itemId, quantity, unitOfMeasureCode, unitCost, totalCost,
        item:item!maintenanceDispatchItem_itemId_fkey(id, name)`
     )
     .eq("maintenanceDispatchId", dispatchId);
@@ -1649,7 +1649,7 @@ export async function getMaintenanceDispatchWorkCenters(
   return client
     .from("maintenanceDispatchWorkCenter")
     .select(
-      `id,
+      `id, workCenterId,
        workCenter:workCenter!maintenanceDispatchWorkCenter_workCenterId_fkey(id, name)`
     )
     .eq("maintenanceDispatchId", dispatchId);

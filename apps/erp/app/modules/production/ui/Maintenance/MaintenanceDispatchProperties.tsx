@@ -1,4 +1,4 @@
-import { Select, ValidatedForm } from "@carbon/form";
+import { DatePicker, Select, Switch, ValidatedForm } from "@carbon/form";
 import {
   Button,
   HStack,
@@ -8,7 +8,7 @@ import {
   toast,
   VStack
 } from "@carbon/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { LuCopy, LuKeySquare, LuLink } from "react-icons/lu";
 import { useFetcher, useParams } from "react-router";
 import { z } from "zod/v3";
@@ -17,6 +17,7 @@ import {
   EmployeeAvatar,
   useOptimisticAssignment
 } from "~/components";
+import { useWorkCenters } from "~/components/Form/WorkCenter";
 import { usePermissions, useRouteData } from "~/hooks";
 import { path } from "~/utils/path";
 import { copyToClipboard } from "~/utils/string";
@@ -27,6 +28,7 @@ import {
 } from "../../production.models";
 import type { MaintenanceDispatchDetail } from "../../types";
 import MaintenancePriority from "./MaintenancePriority";
+import MaintenanceStatus from "./MaintenanceStatus";
 
 const MaintenanceDispatchProperties = () => {
   const { dispatchId } = useParams();
@@ -38,6 +40,8 @@ const MaintenanceDispatchProperties = () => {
     dispatch: MaintenanceDispatchDetail;
     failureModes: { id: string; name: string }[];
   }>(path.to.maintenanceDispatch(dispatchId));
+
+  const { options: workCenterOptions } = useWorkCenters({});
 
   const optimisticAssignment = useOptimisticAssignment({
     id: dispatchId,
@@ -68,10 +72,12 @@ const MaintenanceDispatchProperties = () => {
     [dispatchId, fetcher]
   );
 
+  const isCompleted = routeData?.dispatch?.status === "Completed";
+
   return (
     <VStack
       spacing={4}
-      className="w-80 bg-card h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent border-l border-border px-4 py-2 text-sm"
+      className="w-96 bg-card h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent border-l border-border px-4 py-2 text-sm"
     >
       <VStack spacing={2}>
         <HStack className="w-full justify-between">
@@ -138,6 +144,11 @@ const MaintenanceDispatchProperties = () => {
       </VStack>
 
       <VStack spacing={2}>
+        <h3 className="text-xs text-muted-foreground">Status</h3>
+        <MaintenanceStatus status={routeData?.dispatch?.status} />
+      </VStack>
+
+      <VStack spacing={2}>
         <h3 className="text-xs text-muted-foreground">Assignee</h3>
         <Assignee
           id={dispatchId}
@@ -147,6 +158,28 @@ const MaintenanceDispatchProperties = () => {
           isReadOnly={!permissions.can("update", "production")}
         />
       </VStack>
+
+      <ValidatedForm
+        defaultValues={{
+          workCenterId: routeData?.dispatch?.workCenterId ?? ""
+        }}
+        validator={z.object({
+          workCenterId: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={workCenterOptions}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Work Center"
+          name="workCenterId"
+          inline
+          isClearable
+          onChange={(value) => {
+            onUpdate("workCenterId", value?.value ?? null);
+          }}
+        />
+      </ValidatedForm>
 
       <ValidatedForm
         defaultValues={{
@@ -232,6 +265,65 @@ const MaintenanceDispatchProperties = () => {
             if (value) {
               onUpdate("source", value.value);
             }
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          plannedStartTime: routeData?.dispatch?.plannedStartTime ?? ""
+        }}
+        validator={z.object({
+          plannedStartTime: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <DatePicker
+          name="plannedStartTime"
+          label="Planned Start"
+          inline
+          isDisabled={!permissions.can("update", "production") || isCompleted}
+          onChange={(date) => {
+            onUpdate("plannedStartTime", date);
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          plannedEndTime: routeData?.dispatch?.plannedEndTime ?? ""
+        }}
+        validator={z.object({
+          plannedEndTime: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <DatePicker
+          name="plannedEndTime"
+          label="Planned End"
+          inline
+          isDisabled={!permissions.can("update", "production") || isCompleted}
+          onChange={(date) => {
+            onUpdate("plannedEndTime", date);
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          isFailure: routeData?.dispatch?.isFailure ?? false
+        }}
+        validator={z.object({
+          isFailure: z.boolean().optional()
+        })}
+        className="w-full"
+      >
+        <Switch
+          name="isFailure"
+          label="Is Failure"
+          isDisabled={!permissions.can("update", "production")}
+          onChange={(checked) => {
+            onUpdate("isFailure", checked.toString());
           }}
         />
       </ValidatedForm>

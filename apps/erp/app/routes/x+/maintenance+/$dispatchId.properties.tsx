@@ -72,7 +72,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
     case "source":
     case "suspectedFailureModeId":
     case "actualFailureModeId":
+    case "workCenterId":
       updateData[field] = value || null;
+      break;
+    case "plannedStartTime":
+    case "plannedEndTime":
+      updateData[field] = value ? new Date(value).toISOString() : null;
       break;
     case "isFailure":
       updateData[field] = value === "true";
