@@ -83,12 +83,22 @@ export const digitalQuoteValidator = z.object({
   digitalQuoteIncludesPurchaseOrders: zfd.checkbox()
 });
 
+export const jobCompletedValidator = z.object({
+  inventoryJobCompletedNotificationGroup: z.array(z.string()).optional(),
+  salesJobCompletedNotificationGroup: z.array(z.string()).optional()
+});
+
 export const kanbanOutputValidator = z.object({
   kanbanOutput: z.enum(kanbanOutputTypes)
 });
 
 export const purchasePriceUpdateTimingValidator = z.object({
   purchasePriceUpdateTiming: z.enum(purchasePriceUpdateTimingTypes)
+});
+
+export const maintenanceSettingsValidator = z.object({
+  maintenanceGenerateInAdvance: zfd.checkbox(),
+  maintenanceAdvanceDays: zfd.numeric(z.number().min(1).max(90).default(7))
 });
 
 export const materialIdsValidator = z.object({

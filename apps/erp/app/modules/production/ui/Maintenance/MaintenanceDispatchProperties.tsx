@@ -1,0 +1,310 @@
+import { Select, ValidatedForm } from "@carbon/form";
+import {
+  Button,
+  HStack,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  toast,
+  VStack
+} from "@carbon/react";
+import { useCallback, useEffect } from "react";
+import { LuCopy, LuKeySquare, LuLink } from "react-icons/lu";
+import { useFetcher, useParams } from "react-router";
+import { z } from "zod/v3";
+import {
+  Assignee,
+  EmployeeAvatar,
+  useOptimisticAssignment
+} from "~/components";
+import { usePermissions, useRouteData } from "~/hooks";
+import { path } from "~/utils/path";
+import { copyToClipboard } from "~/utils/string";
+import {
+  maintenanceDispatchPriority,
+  maintenanceSeverity,
+  maintenanceSource
+} from "../../production.models";
+import type { MaintenanceDispatchDetail } from "../../types";
+import MaintenancePriority from "./MaintenancePriority";
+
+const MaintenanceDispatchProperties = () => {
+  const { dispatchId } = useParams();
+  if (!dispatchId) throw new Error("dispatchId not found");
+
+  const permissions = usePermissions();
+
+  const routeData = useRouteData<{
+    dispatch: MaintenanceDispatchDetail;
+    failureModes: { id: string; name: string }[];
+  }>(path.to.maintenanceDispatch(dispatchId));
+
+  const optimisticAssignment = useOptimisticAssignment({
+    id: dispatchId,
+    table: "maintenanceDispatch"
+  });
+  const assignee =
+    optimisticAssignment !== undefined
+      ? optimisticAssignment
+      : routeData?.dispatch?.assignee;
+
+  const fetcher = useFetcher<{ error?: { message: string } }>();
+  useEffect(() => {
+    if (fetcher.data?.error) {
+      toast.error(fetcher.data.error.message);
+    }
+  }, [fetcher.data]);
+
+  const onUpdate = useCallback(
+    (field: string, value: string | null) => {
+      const formData = new FormData();
+      formData.append("field", field);
+      formData.append("value", value?.toString() ?? "");
+      fetcher.submit(formData, {
+        method: "post",
+        action: path.to.maintenanceDispatchProperties(dispatchId)
+      });
+    },
+    [dispatchId, fetcher]
+  );
+
+  return (
+    <VStack
+      spacing={4}
+      className="w-80 bg-card h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-accent border-l border-border px-4 py-2 text-sm"
+    >
+      <VStack spacing={2}>
+        <HStack className="w-full justify-between">
+          <h3 className="text-xs text-muted-foreground">Properties</h3>
+          <HStack spacing={1}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  aria-label="Link"
+                  size="sm"
+                  className="p-1"
+                  onClick={() =>
+                    copyToClipboard(
+                      window.location.origin +
+                        path.to.maintenanceDispatch(dispatchId)
+                    )
+                  }
+                >
+                  <LuLink className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Copy link to dispatch</span>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  aria-label="Copy ID"
+                  size="sm"
+                  className="p-1"
+                  onClick={() => copyToClipboard(routeData?.dispatch?.id ?? "")}
+                >
+                  <LuKeySquare className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Copy dispatch ID</span>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  aria-label="Copy"
+                  size="sm"
+                  className="p-1"
+                  onClick={() => copyToClipboard(routeData?.dispatch?.id ?? "")}
+                >
+                  <LuCopy className="w-3 h-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Copy dispatch number</span>
+              </TooltipContent>
+            </Tooltip>
+          </HStack>
+        </HStack>
+        <span className="text-sm tracking-tight">
+          {routeData?.dispatch?.id}
+        </span>
+      </VStack>
+
+      <VStack spacing={2}>
+        <h3 className="text-xs text-muted-foreground">Assignee</h3>
+        <Assignee
+          id={dispatchId}
+          table="maintenanceDispatch"
+          size="sm"
+          value={assignee ?? ""}
+          isReadOnly={!permissions.can("update", "production")}
+        />
+      </VStack>
+
+      <ValidatedForm
+        defaultValues={{
+          priority: routeData?.dispatch?.priority ?? ""
+        }}
+        validator={z.object({
+          priority: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={maintenanceDispatchPriority.map((priority) => ({
+            value: priority,
+            label: (
+              <div className="flex gap-2 items-center">
+                <MaintenancePriority priority={priority} />
+              </div>
+            )
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Priority"
+          name="priority"
+          inline={(value) => {
+            return (
+              <MaintenancePriority
+                priority={value as (typeof maintenanceDispatchPriority)[number]}
+              />
+            );
+          }}
+          onChange={(value) => {
+            if (value) {
+              onUpdate("priority", value.value);
+            }
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          severity: routeData?.dispatch?.severity ?? ""
+        }}
+        validator={z.object({
+          severity: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={maintenanceSeverity.map((severity) => ({
+            value: severity,
+            label: severity
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Severity"
+          name="severity"
+          inline
+          onChange={(value) => {
+            if (value) {
+              onUpdate("severity", value.value);
+            }
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          source: routeData?.dispatch?.source ?? ""
+        }}
+        validator={z.object({
+          source: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={maintenanceSource.map((source) => ({
+            value: source,
+            label: source
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Source"
+          name="source"
+          inline
+          onChange={(value) => {
+            if (value) {
+              onUpdate("source", value.value);
+            }
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          suspectedFailureModeId:
+            routeData?.dispatch?.suspectedFailureModeId ?? ""
+        }}
+        validator={z.object({
+          suspectedFailureModeId: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={(routeData?.failureModes ?? []).map((mode) => ({
+            value: mode.id,
+            label: mode.name
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Suspected Failure Mode"
+          name="suspectedFailureModeId"
+          inline
+          isClearable
+          onChange={(value) => {
+            onUpdate("suspectedFailureModeId", value?.value ?? null);
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          actualFailureModeId: routeData?.dispatch?.actualFailureModeId ?? ""
+        }}
+        validator={z.object({
+          actualFailureModeId: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={(routeData?.failureModes ?? []).map((mode) => ({
+            value: mode.id,
+            label: mode.name
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="Actual Failure Mode"
+          name="actualFailureModeId"
+          inline
+          isClearable
+          onChange={(value) => {
+            onUpdate("actualFailureModeId", value?.value ?? null);
+          }}
+        />
+      </ValidatedForm>
+
+      <VStack spacing={2}>
+        <h3 className="text-xs text-muted-foreground">Created By</h3>
+        <EmployeeAvatar
+          employeeId={routeData?.dispatch?.createdBy!}
+          size="xxs"
+        />
+      </VStack>
+
+      <VStack spacing={2}>
+        <h3 className="text-xs text-muted-foreground">Created At</h3>
+        <span className="text-sm">
+          {routeData?.dispatch?.createdAt
+            ? new Date(routeData.dispatch.createdAt).toLocaleString()
+            : "-"}
+        </span>
+      </VStack>
+    </VStack>
+  );
+};
+
+export default MaintenanceDispatchProperties;

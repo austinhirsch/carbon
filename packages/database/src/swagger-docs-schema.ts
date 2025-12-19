@@ -23476,6 +23476,18 @@ export default {
             $ref: "#/parameters/rowFilter.maintenanceDispatch.updatedAt",
           },
           {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.source",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.isFailure",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.previousDispatchId",
+          },
+          {
             $ref: "#/parameters/select",
           },
           {
@@ -23592,6 +23604,18 @@ export default {
             $ref: "#/parameters/rowFilter.maintenanceDispatch.updatedAt",
           },
           {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.source",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.isFailure",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.previousDispatchId",
+          },
+          {
             $ref: "#/parameters/preferReturn",
           },
         ],
@@ -23660,6 +23684,18 @@ export default {
           },
           {
             $ref: "#/parameters/rowFilter.maintenanceDispatch.updatedAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.source",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.isFailure",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatch.previousDispatchId",
           },
           {
             $ref: "#/parameters/body.maintenanceDispatch",
@@ -26674,6 +26710,12 @@ export default {
             $ref: "#/parameters/rowFilter.maintenanceDispatchItem.updatedAt",
           },
           {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.unitCost",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.totalCost",
+          },
+          {
             $ref: "#/parameters/select",
           },
           {
@@ -26763,6 +26805,12 @@ export default {
             $ref: "#/parameters/rowFilter.maintenanceDispatchItem.updatedAt",
           },
           {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.unitCost",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.totalCost",
+          },
+          {
             $ref: "#/parameters/preferReturn",
           },
         ],
@@ -26804,6 +26852,12 @@ export default {
           },
           {
             $ref: "#/parameters/rowFilter.maintenanceDispatchItem.updatedAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.unitCost",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceDispatchItem.totalCost",
           },
           {
             $ref: "#/parameters/body.maintenanceDispatchItem",
@@ -41494,6 +41548,231 @@ export default {
           },
         },
         tags: ["quoteOperationTool"],
+      },
+    },
+    "/maintenanceSchedule": {
+      get: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.name",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.description",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.workCenterId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.frequency",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.priority",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.estimatedDuration",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.active",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.lastGeneratedAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.nextDueAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedAt",
+          },
+          {
+            $ref: "#/parameters/select",
+          },
+          {
+            $ref: "#/parameters/order",
+          },
+          {
+            $ref: "#/parameters/range",
+          },
+          {
+            $ref: "#/parameters/rangeUnit",
+          },
+          {
+            $ref: "#/parameters/offset",
+          },
+          {
+            $ref: "#/parameters/limit",
+          },
+          {
+            $ref: "#/parameters/preferCount",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "OK",
+            schema: {
+              items: {
+                $ref: "#/definitions/maintenanceSchedule",
+              },
+              type: "array",
+            },
+          },
+          "206": {
+            description: "Partial Content",
+          },
+        },
+        tags: ["maintenanceSchedule"],
+      },
+      post: {
+        parameters: [
+          {
+            $ref: "#/parameters/body.maintenanceSchedule",
+          },
+          {
+            $ref: "#/parameters/select",
+          },
+          {
+            $ref: "#/parameters/preferPost",
+          },
+        ],
+        responses: {
+          "201": {
+            description: "Created",
+          },
+        },
+        tags: ["maintenanceSchedule"],
+      },
+      delete: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.name",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.description",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.workCenterId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.frequency",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.priority",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.estimatedDuration",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.active",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.lastGeneratedAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.nextDueAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedAt",
+          },
+          {
+            $ref: "#/parameters/preferReturn",
+          },
+        ],
+        responses: {
+          "204": {
+            description: "No Content",
+          },
+        },
+        tags: ["maintenanceSchedule"],
+      },
+      patch: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.name",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.description",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.workCenterId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.frequency",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.priority",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.estimatedDuration",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.active",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.lastGeneratedAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.nextDueAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceSchedule.updatedAt",
+          },
+          {
+            $ref: "#/parameters/body.maintenanceSchedule",
+          },
+          {
+            $ref: "#/parameters/preferReturn",
+          },
+        ],
+        responses: {
+          "204": {
+            description: "No Content",
+          },
+        },
+        tags: ["maintenanceSchedule"],
       },
     },
     "/quoteLines": {
@@ -56331,6 +56610,186 @@ export default {
         tags: ["supplierProcess"],
       },
     },
+    "/maintenanceScheduleItem": {
+      get: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.itemId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.quantity",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.unitOfMeasureCode",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedAt",
+          },
+          {
+            $ref: "#/parameters/select",
+          },
+          {
+            $ref: "#/parameters/order",
+          },
+          {
+            $ref: "#/parameters/range",
+          },
+          {
+            $ref: "#/parameters/rangeUnit",
+          },
+          {
+            $ref: "#/parameters/offset",
+          },
+          {
+            $ref: "#/parameters/limit",
+          },
+          {
+            $ref: "#/parameters/preferCount",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "OK",
+            schema: {
+              items: {
+                $ref: "#/definitions/maintenanceScheduleItem",
+              },
+              type: "array",
+            },
+          },
+          "206": {
+            description: "Partial Content",
+          },
+        },
+        tags: ["maintenanceScheduleItem"],
+      },
+      post: {
+        parameters: [
+          {
+            $ref: "#/parameters/body.maintenanceScheduleItem",
+          },
+          {
+            $ref: "#/parameters/select",
+          },
+          {
+            $ref: "#/parameters/preferPost",
+          },
+        ],
+        responses: {
+          "201": {
+            description: "Created",
+          },
+        },
+        tags: ["maintenanceScheduleItem"],
+      },
+      delete: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.itemId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.quantity",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.unitOfMeasureCode",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedAt",
+          },
+          {
+            $ref: "#/parameters/preferReturn",
+          },
+        ],
+        responses: {
+          "204": {
+            description: "No Content",
+          },
+        },
+        tags: ["maintenanceScheduleItem"],
+      },
+      patch: {
+        parameters: [
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.id",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.maintenanceScheduleId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.itemId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.quantity",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.unitOfMeasureCode",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.companyId",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.createdAt",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedBy",
+          },
+          {
+            $ref: "#/parameters/rowFilter.maintenanceScheduleItem.updatedAt",
+          },
+          {
+            $ref: "#/parameters/body.maintenanceScheduleItem",
+          },
+          {
+            $ref: "#/parameters/preferReturn",
+          },
+        ],
+        responses: {
+          "204": {
+            description: "No Content",
+          },
+        },
+        tags: ["maintenanceScheduleItem"],
+      },
+    },
     "/itemPostingGroup": {
       get: {
         parameters: [
@@ -58339,6 +58798,12 @@ export default {
             $ref: "#/parameters/rowFilter.companySettings.supplierQuoteNotificationGroup",
           },
           {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceGenerateInAdvance",
+          },
+          {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceAdvanceDays",
+          },
+          {
             $ref: "#/parameters/select",
           },
           {
@@ -58443,6 +58908,12 @@ export default {
             $ref: "#/parameters/rowFilter.companySettings.supplierQuoteNotificationGroup",
           },
           {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceGenerateInAdvance",
+          },
+          {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceAdvanceDays",
+          },
+          {
             $ref: "#/parameters/preferReturn",
           },
         ],
@@ -58499,6 +58970,12 @@ export default {
           },
           {
             $ref: "#/parameters/rowFilter.companySettings.supplierQuoteNotificationGroup",
+          },
+          {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceGenerateInAdvance",
+          },
+          {
+            $ref: "#/parameters/rowFilter.companySettings.maintenanceAdvanceDays",
           },
           {
             $ref: "#/parameters/body.companySettings",
@@ -74127,6 +74604,7 @@ export default {
         "companyId",
         "createdBy",
         "createdAt",
+        "isFailure",
       ],
       properties: {
         id: {
@@ -74224,6 +74702,27 @@ export default {
         },
         updatedAt: {
           format: "timestamp with time zone",
+          type: "string",
+        },
+        source: {
+          format: "text",
+          type: "string",
+        },
+        maintenanceScheduleId: {
+          description:
+            "Note:\nThis is a Foreign Key to `maintenanceSchedule.id`.<fk table='maintenanceSchedule' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        isFailure: {
+          default: false,
+          format: "boolean",
+          type: "boolean",
+        },
+        previousDispatchId: {
+          description:
+            "Note:\nThis is a Foreign Key to `maintenanceDispatch.id`.<fk table='maintenanceDispatch' column='id'/>",
+          format: "text",
           type: "string",
         },
       },
@@ -75776,6 +76275,14 @@ export default {
         updatedAt: {
           format: "timestamp with time zone",
           type: "string",
+        },
+        unitCost: {
+          format: "numeric",
+          type: "number",
+        },
+        totalCost: {
+          format: "numeric",
+          type: "number",
         },
       },
       type: "object",
@@ -82584,6 +83091,97 @@ export default {
           description:
             "Note:\nThis is a Foreign Key to `user.id`.<fk table='user' column='id'/>",
           format: "text",
+          type: "string",
+        },
+      },
+      type: "object",
+    },
+    maintenanceSchedule: {
+      required: [
+        "id",
+        "name",
+        "workCenterId",
+        "frequency",
+        "priority",
+        "active",
+        "companyId",
+        "createdBy",
+        "createdAt",
+      ],
+      properties: {
+        id: {
+          default: "public.id()",
+          description: "Note:\nThis is a Primary Key.<pk/>",
+          format: "text",
+          type: "string",
+        },
+        name: {
+          format: "text",
+          type: "string",
+        },
+        description: {
+          format: "text",
+          type: "string",
+        },
+        workCenterId: {
+          description:
+            "Note:\nThis is a Foreign Key to `workCenter.id`.<fk table='workCenter' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        frequency: {
+          enum: ["Daily", "Weekly", "Monthly", "Quarterly", "Annual"],
+          format: 'public."maintenanceFrequency"',
+          type: "string",
+        },
+        priority: {
+          default: "Medium",
+          enum: ["Low", "Medium", "High", "Critical"],
+          format: 'public."maintenanceDispatchPriority"',
+          type: "string",
+        },
+        estimatedDuration: {
+          format: "integer",
+          type: "integer",
+        },
+        active: {
+          default: true,
+          format: "boolean",
+          type: "boolean",
+        },
+        lastGeneratedAt: {
+          format: "timestamp with time zone",
+          type: "string",
+        },
+        nextDueAt: {
+          format: "timestamp with time zone",
+          type: "string",
+        },
+        companyId: {
+          description:
+            "Note:\nThis is a Foreign Key to `company.id`.<fk table='company' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        createdBy: {
+          description:
+            "Note:\nThis is a Foreign Key to `user.id`.<fk table='user' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        createdAt: {
+          default: "now()",
+          format: "timestamp with time zone",
+          type: "string",
+        },
+        updatedBy: {
+          description:
+            "Note:\nThis is a Foreign Key to `user.id`.<fk table='user' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        updatedAt: {
+          format: "timestamp with time zone",
           type: "string",
         },
       },
@@ -89987,6 +90585,74 @@ export default {
       },
       type: "object",
     },
+    maintenanceScheduleItem: {
+      required: [
+        "id",
+        "maintenanceScheduleId",
+        "itemId",
+        "quantity",
+        "unitOfMeasureCode",
+        "companyId",
+        "createdBy",
+        "createdAt",
+      ],
+      properties: {
+        id: {
+          default: "public.id()",
+          description: "Note:\nThis is a Primary Key.<pk/>",
+          format: "text",
+          type: "string",
+        },
+        maintenanceScheduleId: {
+          description:
+            "Note:\nThis is a Foreign Key to `maintenanceSchedule.id`.<fk table='maintenanceSchedule' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        itemId: {
+          description:
+            "Note:\nThis is a Foreign Key to `item.id`.<fk table='item' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        quantity: {
+          format: "integer",
+          type: "integer",
+        },
+        unitOfMeasureCode: {
+          format: "text",
+          type: "string",
+        },
+        companyId: {
+          description:
+            "Note:\nThis is a Foreign Key to `company.id`.<fk table='company' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        createdBy: {
+          description:
+            "Note:\nThis is a Foreign Key to `user.id`.<fk table='user' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        createdAt: {
+          default: "now()",
+          format: "timestamp with time zone",
+          type: "string",
+        },
+        updatedBy: {
+          description:
+            "Note:\nThis is a Foreign Key to `user.id`.<fk table='user' column='id'/>",
+          format: "text",
+          type: "string",
+        },
+        updatedAt: {
+          format: "timestamp with time zone",
+          type: "string",
+        },
+      },
+      type: "object",
+    },
     itemPostingGroup: {
       required: ["id", "name", "active", "companyId", "createdBy", "createdAt"],
       properties: {
@@ -90844,6 +91510,8 @@ export default {
         "gaugeCalibrationExpiredNotificationGroup",
         "purchasePriceUpdateTiming",
         "supplierQuoteNotificationGroup",
+        "maintenanceGenerateInAdvance",
+        "maintenanceAdvanceDays",
       ],
       properties: {
         id: {
@@ -90935,6 +91603,16 @@ export default {
             type: "string",
           },
           type: "array",
+        },
+        maintenanceGenerateInAdvance: {
+          default: false,
+          format: "boolean",
+          type: "boolean",
+        },
+        maintenanceAdvanceDays: {
+          default: 7,
+          format: "integer",
+          type: "integer",
         },
       },
       type: "object",
@@ -103602,6 +104280,30 @@ export default {
       in: "query",
       type: "string",
     },
+    "rowFilter.maintenanceDispatch.source": {
+      name: "source",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceDispatch.maintenanceScheduleId": {
+      name: "maintenanceScheduleId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceDispatch.isFailure": {
+      name: "isFailure",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceDispatch.previousDispatchId": {
+      name: "previousDispatchId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
     "body.openProductionOrders": {
       name: "openProductionOrders",
       description: "openProductionOrders",
@@ -105359,6 +106061,18 @@ export default {
     },
     "rowFilter.maintenanceDispatchItem.updatedAt": {
       name: "updatedAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceDispatchItem.unitCost": {
+      name: "unitCost",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceDispatchItem.totalCost": {
+      name: "totalCost",
       required: false,
       in: "query",
       type: "string",
@@ -113060,6 +113774,105 @@ export default {
     },
     "rowFilter.quoteOperationTool.updatedBy": {
       name: "updatedBy",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "body.maintenanceSchedule": {
+      name: "maintenanceSchedule",
+      description: "maintenanceSchedule",
+      required: false,
+      in: "body",
+      schema: {
+        $ref: "#/definitions/maintenanceSchedule",
+      },
+    },
+    "rowFilter.maintenanceSchedule.id": {
+      name: "id",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.name": {
+      name: "name",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.description": {
+      name: "description",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.workCenterId": {
+      name: "workCenterId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.frequency": {
+      name: "frequency",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.priority": {
+      name: "priority",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.estimatedDuration": {
+      name: "estimatedDuration",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.active": {
+      name: "active",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.lastGeneratedAt": {
+      name: "lastGeneratedAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.nextDueAt": {
+      name: "nextDueAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.companyId": {
+      name: "companyId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.createdBy": {
+      name: "createdBy",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.createdAt": {
+      name: "createdAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.updatedBy": {
+      name: "updatedBy",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceSchedule.updatedAt": {
+      name: "updatedAt",
       required: false,
       in: "query",
       type: "string",
@@ -121314,6 +122127,75 @@ export default {
       in: "query",
       type: "string",
     },
+    "body.maintenanceScheduleItem": {
+      name: "maintenanceScheduleItem",
+      description: "maintenanceScheduleItem",
+      required: false,
+      in: "body",
+      schema: {
+        $ref: "#/definitions/maintenanceScheduleItem",
+      },
+    },
+    "rowFilter.maintenanceScheduleItem.id": {
+      name: "id",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.maintenanceScheduleId": {
+      name: "maintenanceScheduleId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.itemId": {
+      name: "itemId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.quantity": {
+      name: "quantity",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.unitOfMeasureCode": {
+      name: "unitOfMeasureCode",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.companyId": {
+      name: "companyId",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.createdBy": {
+      name: "createdBy",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.createdAt": {
+      name: "createdAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.updatedBy": {
+      name: "updatedBy",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.maintenanceScheduleItem.updatedAt": {
+      name: "updatedAt",
+      required: false,
+      in: "query",
+      type: "string",
+    },
     "body.itemPostingGroup": {
       name: "itemPostingGroup",
       description: "itemPostingGroup",
@@ -122333,6 +123215,18 @@ export default {
     },
     "rowFilter.companySettings.supplierQuoteNotificationGroup": {
       name: "supplierQuoteNotificationGroup",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.companySettings.maintenanceGenerateInAdvance": {
+      name: "maintenanceGenerateInAdvance",
+      required: false,
+      in: "query",
+      type: "string",
+    },
+    "rowFilter.companySettings.maintenanceAdvanceDays": {
+      name: "maintenanceAdvanceDays",
       required: false,
       in: "query",
       type: "string",

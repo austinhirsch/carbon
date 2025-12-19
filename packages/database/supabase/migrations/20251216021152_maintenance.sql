@@ -25,6 +25,46 @@ CREATE TABLE "maintenanceFailureMode" (
   CONSTRAINT "maintenanceFailureMode_updatedBy_fkey" FOREIGN KEY ("updatedBy") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE POLICY "SELECT" ON "public"."maintenanceFailureMode"
+FOR SELECT USING (
+  "companyId" = ANY (
+    (
+      SELECT
+        get_companies_with_employee_permission ('production_view')
+    )::text[]
+  )
+);
+CREATE POLICY "INSERT" ON "maintenanceFailureMode"
+  FOR INSERT
+  WITH CHECK (
+    "companyId" = ANY (
+      (
+        SELECT
+          get_companies_with_employee_permission('production_create')
+      )::text[]
+    )
+  );
+
+CREATE POLICY "UPDATE" ON "maintenanceFailureMode"
+  FOR UPDATE USING (
+    "companyId" = ANY (
+      (
+        SELECT
+          get_companies_with_employee_permission('production_update')
+      )::text[]
+    )
+  );
+
+CREATE POLICY "DELETE" ON "maintenanceFailureMode"
+  FOR DELETE USING (
+    "companyId" = ANY (
+      (
+        SELECT
+          get_companies_with_employee_permission('production_delete')
+      )::text[]
+    )
+  );
+
 DO $$ BEGIN
     CREATE TYPE "maintenanceDispatchPriority" AS ENUM (
       'Low',

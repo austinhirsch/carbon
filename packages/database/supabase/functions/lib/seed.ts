@@ -1584,6 +1584,19 @@ export const groups = [
   },
 ];
 
+export const failureModes: string[] = [
+  "Bearing Failure",
+  "Lubrication Failure",
+  "Electrical Fault",
+  "Leakage",
+  "Excessive Wear/Abrasion",
+  "Misalignment",
+  "Overheating",
+  "Fatigue/Crack",
+  "Blockage/Clogging",
+  "Vibration (Excessive)"
+];
+
 export const nonConformanceTypes: Omit<
   Database["public"]["Tables"]["nonConformanceType"]["Insert"],
   "companyId"

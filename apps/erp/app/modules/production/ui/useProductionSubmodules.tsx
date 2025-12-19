@@ -1,10 +1,13 @@
 import {
+  LuCalendarClock,
   LuChartLine,
+  LuCircleAlert,
   LuHardHat,
   LuListChecks,
   LuSquareChartGantt,
   LuSquareKanban,
-  LuTrash
+  LuTrash,
+  LuWrench
 } from "react-icons/lu";
 import { usePermissions } from "~/hooks";
 import { useSavedViews } from "~/hooks/useSavedViews";
@@ -13,13 +16,20 @@ import { path } from "~/utils/path";
 
 const productionRoutes: AuthenticatedRouteGroup[] = [
   {
-    name: "Manage",
+    name: "Production",
     routes: [
       {
         name: "Jobs",
         to: path.to.jobs,
         icon: <LuHardHat />,
         table: "job"
+      },
+      {
+        name: "Procedures",
+        to: path.to.procedures,
+        icon: <LuListChecks />,
+        table: "procedure",
+        role: "employee"
       }
     ]
   },
@@ -46,20 +56,37 @@ const productionRoutes: AuthenticatedRouteGroup[] = [
     ]
   },
   {
-    name: "Configure",
+    name: "Maintenance",
     routes: [
       {
-        name: "Procedures",
-        to: path.to.procedures,
-        icon: <LuListChecks />,
-        table: "procedure",
-        role: "employee"
+        name: "Dispatches",
+        to: path.to.maintenanceDispatches,
+        icon: <LuWrench />,
+        table: "maintenanceDispatch"
       },
+      {
+        name: "Schedules",
+        to: path.to.maintenanceSchedules,
+        icon: <LuCalendarClock />,
+        table: "maintenanceSchedule",
+        role: "employee"
+      }
+    ]
+  },
+  {
+    name: "Configure",
+    routes: [
       {
         name: "Scrap Reasons",
         to: path.to.scrapReasons,
         role: "employee",
         icon: <LuTrash />
+      },
+      {
+        name: "Failure Modes",
+        to: path.to.failureModes,
+        role: "employee",
+        icon: <LuCircleAlert />
       }
     ]
   }
