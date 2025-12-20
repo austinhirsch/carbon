@@ -1,14 +1,11 @@
-import { assertIsPost, error, success } from "@carbon/auth";
+import { assertIsPost } from "@carbon/auth";
 import { requirePermissions } from "@carbon/auth/auth.server";
-import { flash } from "@carbon/auth/session.server";
 import { validator } from "@carbon/form";
 import type { ActionFunctionArgs } from "react-router";
-import { redirect } from "react-router";
 import {
   maintenanceDispatchItemValidator,
   upsertMaintenanceDispatchItem
 } from "~/modules/production";
-import { path, requestReferrer } from "~/utils/path";
 
 export async function action({ request, params }: ActionFunctionArgs) {
   assertIsPost(request);
@@ -25,10 +22,10 @@ export async function action({ request, params }: ActionFunctionArgs) {
   );
 
   if (validation.error) {
-    throw redirect(
-      requestReferrer(request) ?? path.to.maintenanceDispatch(dispatchId),
-      await flash(request, error(validation.error, "Invalid form data"))
-    );
+    return {
+      success: false,
+      message: "Invalid form data"
+    };
   }
 
   const { itemId, quantity, unitOfMeasureCode, unitCost } = validation.data;
@@ -44,14 +41,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   });
 
   if (result.error) {
-    throw redirect(
-      requestReferrer(request) ?? path.to.maintenanceDispatch(dispatchId),
-      await flash(request, error(result.error, "Failed to add item"))
-    );
+    return {
+      success: false,
+      message: "Failed to add item"
+    };
   }
 
-  throw redirect(
-    requestReferrer(request) ?? path.to.maintenanceDispatch(dispatchId),
-    await flash(request, success("Item added successfully"))
-  );
+  return { success: true };
 }

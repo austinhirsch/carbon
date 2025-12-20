@@ -1,3 +1,4 @@
+import { useCarbon } from "@carbon/auth";
 import {
   DateTimePicker,
   Hidden,
@@ -27,7 +28,7 @@ import {
   ModalTitle,
   ScrollArea,
   Skeleton,
-  Textarea,
+  toast,
   useDisclosure,
   VStack
 } from "@carbon/react";
@@ -43,10 +44,17 @@ import {
   LuTrash
 } from "react-icons/lu";
 import { Link, useFetcher, useParams } from "react-router";
-import { Employee, Item, UnitOfMeasure, WorkCenter } from "~/components/Form";
+import {
+  Employee,
+  Item,
+  TextArea,
+  UnitOfMeasure,
+  WorkCenter
+} from "~/components/Form";
 import { ConfirmDelete } from "~/components/Modals";
 import { LevelLine } from "~/components/TreeView";
 import { usePermissions } from "~/hooks";
+import { MethodItemType } from "~/modules/shared/types";
 import { path } from "~/utils/path";
 import {
   maintenanceDispatchEventValidator,
@@ -352,12 +360,49 @@ function NewItemModal({
   dispatchId: string;
 }) {
   const fetcher = useFetcher();
+  const { carbon } = useCarbon();
 
   useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data) {
+    if (fetcher.state === "idle" && fetcher.data?.success === true) {
       onClose();
     }
   }, [fetcher.state, fetcher.data, onClose]);
+
+  const [itemType, setItemType] = useState<MethodItemType | "Item">("Item");
+  const [itemData, setItemData] = useState<{
+    unitOfMeasureCode: string;
+    unitCost: number;
+  }>({
+    unitOfMeasureCode: "EA",
+    unitCost: 0
+  });
+
+  const onTypeChange = (t: MethodItemType | "Item") => {
+    setItemType(t as MethodItemType);
+    setItemData({
+      unitOfMeasureCode: "EA",
+      unitCost: 0
+    });
+  };
+
+  const onItemChange = async (itemId: string) => {
+    if (!carbon) return;
+
+    const [item, itemCost] = await Promise.all([
+      carbon.from("item").select("unitOfMeasureCode").eq("id", itemId).single(),
+      carbon.from("itemCost").select("unitCost").eq("itemId", itemId).single()
+    ]);
+
+    if (item.error) {
+      toast.error("Failed to load item details");
+      return;
+    }
+
+    setItemData({
+      unitOfMeasureCode: item.data?.unitOfMeasureCode ?? "EA",
+      unitCost: itemCost.data?.unitCost ?? 0
+    });
+  };
 
   return (
     <Modal
@@ -378,11 +423,24 @@ function NewItemModal({
           </ModalHeader>
           <ModalBody>
             <Hidden name="maintenanceDispatchId" value={dispatchId} />
+            <Hidden name="unitCost" value={itemData.unitCost} />
             <VStack spacing={4}>
-              <Item name="itemId" label="Item" type="Item" />
+              <Item
+                name="itemId"
+                label={itemType}
+                type={itemType}
+                onChange={(value) => {
+                  onItemChange(value?.value as string);
+                }}
+                onTypeChange={onTypeChange}
+              />
               <Number name="quantity" label="Quantity" minValue={1} />
-              <UnitOfMeasure name="unitOfMeasureCode" label="Unit of Measure" />
-              <Number name="unitCost" label="Unit Cost" minValue={0} />
+              <UnitOfMeasure
+                name="unitOfMeasureCode"
+                label="Unit of Measure"
+                value={itemData.unitOfMeasureCode}
+                isReadOnly
+              />
             </VStack>
           </ModalBody>
           <ModalFooter>
@@ -438,7 +496,7 @@ function NewTimecardModal({
               <WorkCenter name="workCenterId" label="Work Center" />
               <DateTimePicker name="startTime" label="Start Time" />
               <DateTimePicker name="endTime" label="End Time" />
-              <Textarea name="notes" label="Notes" />
+              <TextArea name="notes" label="Notes" />
             </VStack>
           </ModalBody>
           <ModalFooter>

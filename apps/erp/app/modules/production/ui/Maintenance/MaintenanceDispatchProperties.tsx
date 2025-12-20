@@ -1,4 +1,4 @@
-import { Boolean, DatePicker, Select, ValidatedForm } from "@carbon/form";
+import { Boolean, DateTimePicker, Select, ValidatedForm } from "@carbon/form";
 import {
   Button,
   HStack,
@@ -304,7 +304,7 @@ const MaintenanceDispatchProperties = () => {
         })}
         className="w-full"
       >
-        <DatePicker
+        <DateTimePicker
           name="plannedStartTime"
           label="Planned Start"
           inline
@@ -324,7 +324,7 @@ const MaintenanceDispatchProperties = () => {
         })}
         className="w-full"
       >
-        <DatePicker
+        <DateTimePicker
           name="plannedEndTime"
           label="Planned End"
           inline
@@ -426,15 +426,6 @@ const MaintenanceDispatchProperties = () => {
           employeeId={routeData?.dispatch?.createdBy!}
           size="xxs"
         />
-      </VStack>
-
-      <VStack spacing={2}>
-        <h3 className="text-xs text-muted-foreground">Created At</h3>
-        <span className="text-sm">
-          {routeData?.dispatch?.createdAt
-            ? new Date(routeData.dispatch.createdAt).toLocaleString()
-            : "-"}
-        </span>
       </VStack>
     </VStack>
   );
