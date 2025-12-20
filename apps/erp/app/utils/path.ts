@@ -77,7 +77,7 @@ export const path = {
       kanbanStart: (id: string) => generatePath(`${api}/kanban/start/${id}`),
       locations: `${api}/resources/locations`,
       maintenanceDispatches: `${api}/production/maintenance`,
-      maintenanceSchedules: `${api}/production/maintenance-schedules`,
+      maintenanceSchedules: `${api}/production/scheduled-maintenance`,
       materialDimensions: (formId: string) =>
         generatePath(`${api}/items/dimensions/${formId}`),
       materialFinishes: (substanceId: string) =>
@@ -604,7 +604,7 @@ export const path = {
     deleteMaintenanceDispatch: (id: string) =>
       generatePath(`${x}/production/maintenance/delete/${id}`),
     deleteMaintenanceSchedule: (id: string) =>
-      generatePath(`${x}/production/maintenance-schedules/delete/${id}`),
+      generatePath(`${x}/production/scheduled-maintenance/delete/${id}`),
     deleteNoQuoteReason: (id: string) =>
       generatePath(`${x}/sales/no-quote-reasons/delete/${id}`),
     deleteCustomerPortal: (id: string) =>
@@ -878,8 +878,8 @@ export const path = {
       generatePath(`${x}/maintenance/${dispatchId}/event/${eventId}/delete`),
     maintenanceDispatches: `${x}/production/maintenance`,
     maintenanceSchedule: (id: string) =>
-      generatePath(`${x}/production/maintenance-schedules/${id}`),
-    maintenanceSchedules: `${x}/production/maintenance-schedules`,
+      generatePath(`${x}/production/scheduled-maintenance/${id}`),
+    maintenanceSchedules: `${x}/production/scheduled-maintenance`,
     makeMethodGet: `${x}/items/methods/get`,
     makeMethodSave: `${x}/items/methods/save`,
     markTrainingComplete: `${x}/resources/assignments/complete`,
@@ -1003,7 +1003,7 @@ export const path = {
     newKanban: `${x}/inventory/kanbans/new`,
     newLocation: `${x}/resources/locations/new`,
     newMaintenanceDispatch: `${x}/maintenance/new`,
-    newMaintenanceSchedule: `${x}/production/maintenance-schedules/new`,
+    newMaintenanceSchedule: `${x}/production/scheduled-maintenance/new`,
     newMakeMethodVersion: `${x}/items/methods/version/new`,
     newMaterial: `${x}/material/new`,
     newMethodMaterial: `${x}/items/methods/material/new`,

@@ -310,7 +310,7 @@ const MaintenanceDispatchProperties = () => {
           inline
           isDisabled={!permissions.can("update", "production") || isCompleted}
           onChange={(date) => {
-            onUpdate("plannedStartTime", date);
+            onUpdate("plannedStartTime", date?.toString() ?? null);
           }}
         />
       </ValidatedForm>
@@ -330,7 +330,7 @@ const MaintenanceDispatchProperties = () => {
           inline
           isDisabled={!permissions.can("update", "production") || isCompleted}
           onChange={(date) => {
-            onUpdate("plannedEndTime", date);
+            onUpdate("plannedEndTime", date?.toString() ?? null);
           }}
         />
       </ValidatedForm>

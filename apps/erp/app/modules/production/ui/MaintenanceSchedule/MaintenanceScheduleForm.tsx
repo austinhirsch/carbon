@@ -1,7 +1,6 @@
-import { Number, Select, ValidatedForm } from "@carbon/form";
+import { Boolean, Number, Select, ValidatedForm } from "@carbon/form";
 import {
   Button,
-  Checkbox,
   HStack,
   ModalDrawer,
   ModalDrawerBody,
@@ -15,8 +14,12 @@ import {
 } from "@carbon/react";
 import type { PostgrestResponse } from "@supabase/supabase-js";
 import { useEffect } from "react";
+import { BsExclamationSquareFill } from "react-icons/bs";
 import { useFetcher } from "react-router";
 import type { z } from "zod/v3";
+import { HighPriorityIcon } from "~/assets/icons/HighPriorityIcon";
+import { LowPriorityIcon } from "~/assets/icons/LowPriorityIcon";
+import { MediumPriorityIcon } from "~/assets/icons/MediumPriorityIcon";
 import { Hidden, Input, Submit, WorkCenter } from "~/components/Form";
 import { usePermissions } from "~/hooks";
 import { path } from "~/utils/path";
@@ -25,6 +28,21 @@ import {
   maintenanceFrequency,
   maintenanceScheduleValidator
 } from "../../production.models";
+
+function getPriorityIcon(
+  priority: (typeof maintenanceDispatchPriority)[number]
+) {
+  switch (priority) {
+    case "Critical":
+      return <BsExclamationSquareFill className="text-red-500" />;
+    case "High":
+      return <HighPriorityIcon />;
+    case "Medium":
+      return <MediumPriorityIcon />;
+    case "Low":
+      return <LowPriorityIcon />;
+  }
+}
 
 type MaintenanceScheduleFormProps = {
   initialValues: z.infer<typeof maintenanceScheduleValidator>;
@@ -83,7 +101,7 @@ const MaintenanceScheduleForm = ({
           >
             <ModalDrawerHeader>
               <ModalDrawerTitle>
-                {isEditing ? "Edit" : "New"} Maintenance Schedule
+                {isEditing ? "Edit" : "New"} Scheduled Maintenance
               </ModalDrawerTitle>
             </ModalDrawerHeader>
             <ModalDrawerBody>
@@ -105,15 +123,20 @@ const MaintenanceScheduleForm = ({
                   label="Priority"
                   options={maintenanceDispatchPriority.map((priority) => ({
                     value: priority,
-                    label: priority
+                    label: (
+                      <div className="flex gap-1 items-center">
+                        {getPriorityIcon(priority)}
+                        <span>{priority}</span>
+                      </div>
+                    )
                   }))}
                 />
                 <Number
                   name="estimatedDuration"
                   label="Estimated Duration (minutes)"
-                  min={0}
+                  minValue={0}
                 />
-                <Checkbox name="active" label="Active" />
+                <Boolean name="active" label="Active" />
               </VStack>
             </ModalDrawerBody>
             <ModalDrawerFooter>

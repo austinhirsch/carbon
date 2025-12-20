@@ -962,7 +962,7 @@ export const maintenanceScheduleValidator = z.object({
   frequency: z.enum(maintenanceFrequency),
   priority: z.enum(maintenanceDispatchPriority),
   estimatedDuration: zfd.numeric(z.number().optional()),
-  active: z.boolean().default(true)
+  active: zfd.checkbox()
 });
 
 export const maintenanceScheduleItemValidator = z.object({

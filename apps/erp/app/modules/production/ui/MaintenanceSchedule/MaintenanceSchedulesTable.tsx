@@ -148,13 +148,13 @@ const MaintenanceSchedulesTable = memo(
         primaryAction={
           permissions.can("create", "production") && (
             <New
-              label="Maintenance Schedule"
+              label="Scheduled Maintenance"
               to={`${path.to.newMaintenanceSchedule}?${params.toString()}`}
             />
           )
         }
         renderContextMenu={renderContextMenu}
-        title="Maintenance Schedules"
+        title="Scheduled Maintenances"
       />
     );
   }
