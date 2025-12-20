@@ -1675,12 +1675,8 @@ export async function getMaintenanceSchedules(
   args?: GenericQueryFilters & { search: string | null; active?: boolean }
 ) {
   let query = client
-    .from("maintenanceSchedule")
-    .select(
-      `id, name, frequency, priority, estimatedDuration, active, nextDueAt, lastGeneratedAt,
-       workCenter:workCenter!maintenanceSchedule_workCenterId_fkey(id, name)`,
-      { count: "exact" }
-    )
+    .from("maintenanceSchedules")
+    .select(`*`, { count: "exact" })
     .eq("companyId", companyId);
 
   if (args?.search) {

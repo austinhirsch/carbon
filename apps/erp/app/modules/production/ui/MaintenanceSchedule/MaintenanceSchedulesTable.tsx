@@ -1,10 +1,21 @@
 import { HStack, MenuIcon, MenuItem, Status } from "@carbon/react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback, useMemo } from "react";
-import { LuPencil, LuTrash } from "react-icons/lu";
+import {
+  LuActivity,
+  LuBuilding,
+  LuCalendar,
+  LuChartNoAxesColumnIncreasing,
+  LuClock,
+  LuMapPin,
+  LuPencil,
+  LuToggleRight,
+  LuTrash
+} from "react-icons/lu";
 import { useNavigate } from "react-router";
 import { Hyperlink, New, Table } from "~/components";
 import { Enumerable } from "~/components/Enumerable";
+import { useLocations } from "~/components/Form/Location";
 import { usePermissions, useUrlParams } from "~/hooks";
 import { path } from "~/utils/path";
 import {
@@ -24,6 +35,7 @@ const MaintenanceSchedulesTable = memo(
     const [params] = useUrlParams();
     const navigate = useNavigate();
     const permissions = usePermissions();
+    const locations = useLocations();
 
     const columns = useMemo<ColumnDef<MaintenanceSchedule>[]>(() => {
       return [
@@ -31,7 +43,7 @@ const MaintenanceSchedulesTable = memo(
           accessorKey: "name",
           header: "Schedule Name",
           cell: ({ row }) => (
-            <Hyperlink to={row.original.id}>
+            <Hyperlink to={row.original.id!}>
               <Enumerable value={row.original.name} />
             </Hyperlink>
           )
@@ -39,7 +51,25 @@ const MaintenanceSchedulesTable = memo(
         {
           accessorKey: "workCenter",
           header: "Work Center",
-          cell: ({ row }) => row.original.workCenter?.name ?? "-"
+          cell: ({ row }) => <Enumerable value={row.original.workCenterName} />,
+          meta: {
+            icon: <LuBuilding />
+          }
+        },
+        {
+          accessorKey: "locationId",
+          header: "Location",
+          cell: ({ row }) => <Enumerable value={row.original.locationName} />,
+          meta: {
+            icon: <LuMapPin />,
+            filter: {
+              type: "static",
+              options: locations.map((location) => ({
+                value: location.value,
+                label: <Enumerable value={location.label!} />
+              }))
+            }
+          }
         },
         {
           accessorKey: "frequency",
@@ -50,6 +80,7 @@ const MaintenanceSchedulesTable = memo(
             return <Enumerable value={frequency} />;
           },
           meta: {
+            icon: <LuActivity />,
             filter: {
               type: "static",
               options: maintenanceFrequency.map((freq) => ({
@@ -70,6 +101,7 @@ const MaintenanceSchedulesTable = memo(
           },
           meta: {
             filter: {
+              icon: <LuChartNoAxesColumnIncreasing />,
               type: "static",
               options: maintenanceDispatchPriority.map((priority) => ({
                 value: priority,
@@ -85,7 +117,10 @@ const MaintenanceSchedulesTable = memo(
           cell: ({ row }) =>
             row.original.estimatedDuration
               ? `${row.original.estimatedDuration} min`
-              : "-"
+              : "-",
+          meta: {
+            icon: <LuClock />
+          }
         },
         {
           accessorKey: "active",
@@ -95,7 +130,10 @@ const MaintenanceSchedulesTable = memo(
               <Status color="green">Active</Status>
             ) : (
               <Status color="gray">Inactive</Status>
-            )
+            ),
+          meta: {
+            icon: <LuToggleRight />
+          }
         },
         {
           accessorKey: "nextDueAt",
@@ -103,7 +141,10 @@ const MaintenanceSchedulesTable = memo(
           cell: ({ row }) =>
             row.original.nextDueAt
               ? new Date(row.original.nextDueAt).toLocaleDateString()
-              : "-"
+              : "-",
+          meta: {
+            icon: <LuCalendar />
+          }
         }
       ];
     }, []);
