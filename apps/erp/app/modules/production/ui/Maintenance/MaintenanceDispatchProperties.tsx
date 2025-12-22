@@ -25,7 +25,8 @@ import { copyToClipboard } from "~/utils/string";
 import {
   maintenanceDispatchPriority,
   maintenanceSeverity,
-  maintenanceSource
+  maintenanceSource,
+  oeeImpact
 } from "../../production.models";
 import type { MaintenanceDispatchDetail } from "../../types";
 import MaintenancePriority from "./MaintenancePriority";
@@ -295,6 +296,34 @@ const MaintenanceDispatchProperties = () => {
           onChange={(value) => {
             if (value) {
               onUpdate("source", value.value);
+            }
+          }}
+        />
+      </ValidatedForm>
+
+      <ValidatedForm
+        defaultValues={{
+          oeeImpact: routeData?.dispatch?.oeeImpact ?? "No Impact"
+        }}
+        validator={z.object({
+          oeeImpact: z.string().optional()
+        })}
+        className="w-full"
+      >
+        <Select
+          options={oeeImpact.map((impact) => ({
+            value: impact,
+            label: impact
+          }))}
+          isReadOnly={!permissions.can("update", "production")}
+          label="OEE Impact"
+          name="oeeImpact"
+          inline={(value) => {
+            return <span>{value}</span>;
+          }}
+          onChange={(value) => {
+            if (value) {
+              onUpdate("oeeImpact", value.value);
             }
           }}
         />

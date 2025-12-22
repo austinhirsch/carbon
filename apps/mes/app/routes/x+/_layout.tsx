@@ -34,6 +34,7 @@ import {
 import { AppSidebar } from "~/components";
 import RealtimeDataProvider from "~/components/RealtimeDataProvider";
 import { getLocation, setLocation } from "~/services/location.server";
+import { getActiveMaintenanceEventsCount } from "~/services/maintenance.service";
 import {
   getActiveJobCount,
   getLocationsByCompany
@@ -90,6 +91,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
       })
     ]);
 
+  // Get active maintenance count after we have the location
+  const activeMaintenanceCount = await getActiveMaintenanceEventsCount(
+    client,
+    storedLocations.location
+  );
+
   if (!companyPlan && CarbonEdition === Edition.Cloud) {
     throw redirect(path.to.onboarding);
   }
@@ -106,6 +113,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         expiresAt
       },
       activeEvents: activeEvents.data ?? 0,
+      activeMaintenanceCount: activeMaintenanceCount.count ?? 0,
       company,
       companies: companies.data ?? [],
       location: storedLocations.location,
@@ -127,6 +135,7 @@ export default function AuthenticatedRoute() {
   const {
     session,
     activeEvents,
+    activeMaintenanceCount,
     company,
     companies,
     location,
@@ -176,6 +185,7 @@ export default function AuthenticatedRoute() {
 
                 <AppSidebar
                   activeEvents={activeEvents}
+                  activeMaintenanceCount={activeMaintenanceCount}
                   company={company}
                   companies={companies}
                   location={location}

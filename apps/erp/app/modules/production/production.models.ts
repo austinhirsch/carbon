@@ -92,6 +92,8 @@ export const maintenanceSource = [
   "Non-Conformance"
 ] as const;
 
+export const oeeImpact = ["Down", "Planned", "Impact", "No Impact"] as const;
+
 export const procedureStatus = ["Draft", "Active", "Archived"] as const;
 
 const baseJobValidator = z.object({
@@ -895,6 +897,7 @@ export const maintenanceDispatchValidator = z.object({
   priority: z.enum(maintenanceDispatchPriority),
   severity: z.enum(maintenanceSeverity).optional(),
   source: z.enum(maintenanceSource).optional(),
+  oeeImpact: z.enum(oeeImpact).optional(),
   workCenterId: zfd.text(z.string().optional()),
   suspectedFailureModeId: zfd.text(z.string().optional()),
   plannedStartTime: zfd.text(z.string().optional()),

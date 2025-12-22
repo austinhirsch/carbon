@@ -61,6 +61,7 @@ export async function action({ request }: ActionFunctionArgs) {
         status,
         priority: validation.data.priority,
         severity: validation.data.severity,
+        oeeImpact: validation.data.oeeImpact,
         source: "Reactive", // Coming from MES is always reactive
         workCenterId: validation.data.workCenterId,
         suspectedFailureModeId:

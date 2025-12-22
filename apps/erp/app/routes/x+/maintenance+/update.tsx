@@ -29,6 +29,7 @@ export async function action({ request }: ActionFunctionArgs) {
     case "severity":
     case "source":
     case "status":
+    case "oeeImpact":
     case "suspectedFailureModeId":
     case "actualFailureModeId":
     case "workCenterId":
@@ -36,6 +37,8 @@ export async function action({ request }: ActionFunctionArgs) {
       break;
     case "plannedStartTime":
     case "plannedEndTime":
+    case "actualStartTime":
+    case "actualEndTime":
       updateData[field] = value ? new Date(value).toISOString() : null;
       break;
     case "isFailure":

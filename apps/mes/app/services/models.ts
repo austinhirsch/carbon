@@ -61,6 +61,8 @@ export const maintenanceSource = [
   "Non-Conformance"
 ] as const;
 
+export const oeeImpact = ["Down", "Planned", "Impact", "No Impact"] as const;
+
 export const convertEntityValidator = z.object({
   trackedEntityId: z.string(),
   newRevision: z.string(),
@@ -163,6 +165,9 @@ export const maintenanceDispatchValidator = z.object({
   }),
   severity: z.enum(maintenanceSeverity, {
     errorMap: () => ({ message: "Severity is required" })
+  }),
+  oeeImpact: z.enum(oeeImpact, {
+    errorMap: () => ({ message: "OEE Impact is required" })
   }),
   isFailure: zfd.checkbox(),
   suspectedFailureModeId: zfd.text(z.string().optional()),

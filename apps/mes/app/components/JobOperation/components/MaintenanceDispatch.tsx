@@ -41,7 +41,8 @@ import { useUser } from "~/hooks";
 import {
   maintenanceDispatchPriority,
   maintenanceDispatchValidator,
-  maintenanceSeverity
+  maintenanceSeverity,
+  oeeImpact
 } from "~/services/models";
 import { getPrivateUrl, path } from "~/utils/path";
 
@@ -176,6 +177,7 @@ export function MaintenanceDispatch({
                 isFailure: false,
                 priority: "Medium",
                 severity: "Operator Performed",
+                oeeImpact: "No Impact",
                 suspectedFailureModeId: undefined
               }}
               fetcher={fetcher}
@@ -228,6 +230,14 @@ export function MaintenanceDispatch({
                           );
                         }
                       }}
+                    />
+                    <Select
+                      name="oeeImpact"
+                      label="OEE Impact"
+                      options={oeeImpact.map((impact) => ({
+                        value: impact,
+                        label: impact
+                      }))}
                     />
                     {severity === "Operator Performed" && (
                       <>
