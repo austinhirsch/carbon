@@ -5,13 +5,14 @@ import {
   carbonClient,
   error,
   getMESUrl,
-  magicLinkValidator,
+  loginWithPasswordOrMagicLinkValidator,
   RATE_LIMIT
 } from "@carbon/auth";
-import { sendMagicLink, verifyAuthSession } from "@carbon/auth/auth.server";
-import { flash, getAuthSession } from "@carbon/auth/session.server";
+import { sendMagicLink, signInWithEmail, verifyAuthSession } from "@carbon/auth/auth.server";
+import { setCompanyId } from "@carbon/auth/company.server";
+import { flash, getAuthSession, setAuthSession } from "@carbon/auth/session.server";
 import { getUserByEmail } from "@carbon/auth/users.server";
-import { Hidden, Input, Submit, ValidatedForm, validator } from "@carbon/form";
+import { Hidden, Input, Password, Submit, ValidatedForm, validator } from "@carbon/form";
 import { redis } from "@carbon/kv";
 import {
   Alert,
@@ -66,30 +67,55 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  const validation = await validator(magicLinkValidator).validate(
+  const validation = await validator(loginWithPasswordOrMagicLinkValidator).validate(
     await request.formData()
   );
 
   if (validation.error) {
-    return error(validation.error, "Invalid email address");
+    return error(validation.error, "Invalid email or password");
   }
 
-  const { email } = validation.data;
+  const { email, password } = validation.data;
   const user = await getUserByEmail(email);
 
-  if (user.data && user.data.active) {
-    const magicLink = await sendMagicLink(email, getMESUrl());
-
-    if (!magicLink) {
-      return data(
-        error(magicLink, "Failed to send magic link"),
-        await flash(request, error(magicLink, "Failed to send magic link"))
-      );
-    }
-  } else {
+  if (!user.data || !user.data.active) {
     return data(
       { success: false, message: "Invalid email/password combination" },
       await flash(request, error(null, "Failed to sign in"))
+    );
+  }
+
+  // If password is provided, try password authentication
+  if (password) {
+    const authSession = await signInWithEmail(email, password);
+
+    if (!authSession) {
+      return data(
+        { success: false, message: "Invalid email/password combination" },
+        await flash(request, error(null, "Invalid email/password combination"))
+      );
+    }
+
+    const sessionCookie = await setAuthSession(request, {
+      authSession
+    });
+    const companyIdCookie = setCompanyId(authSession.companyId);
+
+    return redirect(path.to.authenticatedRoot, {
+      headers: [
+        ["Set-Cookie", sessionCookie],
+        ["Set-Cookie", companyIdCookie]
+      ]
+    });
+  }
+
+  // Otherwise, send magic link
+  const magicLink = await sendMagicLink(email, getMESUrl());
+
+  if (!magicLink) {
+    return data(
+      error(magicLink, "Failed to send magic link"),
+      await flash(request, error(magicLink, "Failed to send magic link"))
     );
   }
 
@@ -157,7 +183,7 @@ export default function LoginRoute() {
         ) : (
           <ValidatedForm
             fetcher={fetcher}
-            validator={magicLinkValidator}
+            validator={loginWithPasswordOrMagicLinkValidator}
             defaultValues={{ redirectTo }}
             method="post"
           >
@@ -172,6 +198,7 @@ export default function LoginRoute() {
               )}
 
               <Input name="email" label="" placeholder="Email Address" />
+              <Password name="password" label="" placeholder="Password (optional)" />
 
               <Submit
                 isDisabled={fetcher.state !== "idle"}
@@ -180,7 +207,7 @@ export default function LoginRoute() {
                 className="w-full"
                 withBlocker={false}
               >
-                Sign in with Email
+                Sign in
               </Submit>
 
               <Button

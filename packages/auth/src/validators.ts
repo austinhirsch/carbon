@@ -17,6 +17,15 @@ export const emailAndPasswordValidator = z.object({
   password: z.string().min(6, { message: "Password is too short" })
 });
 
+export const loginWithPasswordOrMagicLinkValidator = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email("Must be a valid email"),
+  password: zfd.text(z.string().min(6, { message: "Password is too short" }).optional()),
+  redirectTo: zfd.text(z.string().optional())
+});
+
 export const forgotPasswordValidator = z.object({
   email: z
     .string()
