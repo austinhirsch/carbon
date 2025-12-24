@@ -26,6 +26,7 @@ import { HighPriorityIcon } from "~/assets/icons/HighPriorityIcon";
 import { LowPriorityIcon } from "~/assets/icons/LowPriorityIcon";
 import { MediumPriorityIcon } from "~/assets/icons/MediumPriorityIcon";
 import EmployeeAvatar from "~/components/EmployeeAvatar";
+import MaintenanceOeeImpact from "~/components/MaintenanceOeeImpact";
 import {
   getActiveMaintenanceEventByEmployee,
   getMaintenanceDispatch,
@@ -116,21 +117,6 @@ function MaintenanceStatus({ status, className }: MaintenanceStatusProps) {
   }
 }
 
-function getOeeImpactBadge(
-  oeeImpact: Database["public"]["Enums"]["oeeImpact"]
-) {
-  switch (oeeImpact) {
-    case "Down":
-      return <Badge variant="destructive">Down</Badge>;
-    case "Planned":
-      return <Badge variant="secondary">Planned</Badge>;
-    case "Impact":
-      return <Badge variant="yellow">Impact</Badge>;
-    default:
-      return <Badge variant="outline">No Impact</Badge>;
-  }
-}
-
 function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -212,7 +198,7 @@ export default function MaintenanceDetailRoute() {
                 {dispatch.workCenter?.name ?? "Unknown"}
               </span>
               <HStack className="mt-2">
-                {getOeeImpactBadge(dispatch.oeeImpact)}
+                <MaintenanceOeeImpact oeeImpact={dispatch.oeeImpact} />
                 <Badge variant="outline">{dispatch.severity}</Badge>
               </HStack>
             </VStack>

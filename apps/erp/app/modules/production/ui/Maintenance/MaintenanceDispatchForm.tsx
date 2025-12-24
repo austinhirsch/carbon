@@ -30,6 +30,7 @@ import {
   maintenanceSource,
   oeeImpact
 } from "../../production.models";
+import MaintenanceOeeImpact from "./MaintenanceOeeImpact";
 import MaintenanceSeverity from "./MaintenanceSeverity";
 import MaintenanceSource from "./MaintenanceSource";
 
@@ -170,7 +171,7 @@ const MaintenanceDispatchForm = ({
                 label="OEE Impact"
                 options={oeeImpact.map((impact) => ({
                   value: impact,
-                  label: impact
+                  label: <MaintenanceOeeImpact oeeImpact={impact} />
                 }))}
                 onChange={(option) => {
                   if (option?.value) {

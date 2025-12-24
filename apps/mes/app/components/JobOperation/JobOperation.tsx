@@ -74,9 +74,10 @@ import {
   LuQrCode,
   LuSquareUser,
   LuTimer,
-  LuTriangleAlert
+  LuTriangleAlert,
+  LuWrench
 } from "react-icons/lu";
-import { Await, useFetcher, useNavigate, useParams } from "react-router";
+import { Await, Link, useFetcher, useNavigate, useParams } from "react-router";
 import {
   DeadlineIcon,
   FileIcon,
@@ -153,7 +154,15 @@ type JobOperationProps = {
   job: Job;
   thumbnailPath: string | null;
   trackedEntities: TrackedEntity[];
-  workCenter: Promise<PostgrestSingleResponse<{ name: string; id: string }>>;
+  workCenter: Promise<
+    PostgrestSingleResponse<{
+      name: string;
+      id: string;
+      isBlocked: boolean | null;
+      blockingDispatchId: string | null;
+      blockingDispatchReadableId: string | null;
+    }>
+  >;
 };
 
 export const JobOperation = ({
@@ -1852,14 +1861,46 @@ export const JobOperation = ({
                     <Await resolve={workCenter}>
                       {(resolvedWorkCenter) =>
                         resolvedWorkCenter.data && (
-                          <HStack className="justify-between items-start w-full">
-                            <Heading size="h4" className="line-clamp-1">
-                              {resolvedWorkCenter.data?.name}
-                            </Heading>
-                            <MaintenanceDispatch
-                              workCenter={resolvedWorkCenter.data}
-                            />
-                          </HStack>
+                          <VStack spacing={1}>
+                            <HStack className="justify-between items-start w-full">
+                              <Heading size="h4" className="line-clamp-1">
+                                {resolvedWorkCenter.data?.name}
+                              </Heading>
+                              <MaintenanceDispatch
+                                workCenter={resolvedWorkCenter.data}
+                              />
+                            </HStack>
+                            {resolvedWorkCenter.data?.isBlocked &&
+                              resolvedWorkCenter.data?.blockingDispatchId && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Link
+                                      to={path.to.maintenanceDetail(
+                                        resolvedWorkCenter.data
+                                          .blockingDispatchId
+                                      )}
+                                    >
+                                      <Badge
+                                        variant="red"
+                                        className="inline-flex items-center gap-1"
+                                      >
+                                        <LuWrench className="h-3 w-3" />
+                                        <span>Blocked by maintenance</span>
+                                      </Badge>
+                                    </Link>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>
+                                      Blocked by{" "}
+                                      {
+                                        resolvedWorkCenter.data
+                                          ?.blockingDispatchReadableId
+                                      }
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                          </VStack>
                         )
                       }
                     </Await>

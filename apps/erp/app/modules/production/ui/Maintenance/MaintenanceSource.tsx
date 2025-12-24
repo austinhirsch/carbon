@@ -1,5 +1,10 @@
 import { Badge, cn } from "@carbon/react";
-import { LuCalendarClock, LuShieldX, LuTriangleAlert } from "react-icons/lu";
+import {
+  LuCalendarClock,
+  LuRefreshCcwDot,
+  LuShieldX,
+  LuTriangleAlert
+} from "react-icons/lu";
 import type { maintenanceSource } from "../../production.models";
 
 type MaintenanceSourceProps = {
@@ -22,10 +27,10 @@ function MaintenanceSource({ source, className }: MaintenanceSourceProps) {
     case "Reactive":
       return (
         <Badge
-          variant="red"
+          variant="orange"
           className={cn(className, "inline-flex items-center gap-1")}
         >
-          <LuTriangleAlert />
+          <LuRefreshCcwDot />
           {source}
         </Badge>
       );

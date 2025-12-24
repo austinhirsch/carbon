@@ -28,6 +28,7 @@ import {
   oeeImpact
 } from "../../production.models";
 import type { MaintenanceDispatchDetail } from "../../types";
+import MaintenanceOeeImpact from "./MaintenanceOeeImpact";
 import MaintenancePriority from "./MaintenancePriority";
 import MaintenanceSeverity from "./MaintenanceSeverity";
 import MaintenanceSource from "./MaintenanceSource";
@@ -283,7 +284,7 @@ const MaintenanceDispatchProperties = () => {
         <Select
           options={maintenanceSource.map((source) => ({
             value: source,
-            label: source
+            label: <MaintenanceSource source={source} />
           }))}
           isReadOnly={!permissions.can("update", "production")}
           label="Source"
@@ -315,13 +316,17 @@ const MaintenanceDispatchProperties = () => {
         <Select
           options={oeeImpact.map((impact) => ({
             value: impact,
-            label: impact
+            label: <MaintenanceOeeImpact oeeImpact={impact} />
           }))}
           isReadOnly={!permissions.can("update", "production")}
           label="OEE Impact"
           name="oeeImpact"
           inline={(value) => {
-            return <span>{value}</span>;
+            return (
+              <MaintenanceOeeImpact
+                oeeImpact={value as (typeof oeeImpact)[number]}
+              />
+            );
           }}
           onChange={(value) => {
             if (value) {

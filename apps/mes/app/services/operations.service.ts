@@ -593,8 +593,10 @@ export async function getWorkCenter(
   workCenterId: string
 ) {
   return client
-    .from("workCenter")
-    .select("id, name")
+    .from("workCentersWithBlockingStatus")
+    .select(
+      "id, name, isBlocked, blockingDispatchId, blockingDispatchReadableId"
+    )
     .eq("id", workCenterId)
     .single();
 }
@@ -603,12 +605,43 @@ export async function getWorkCentersByLocation(
   client: SupabaseClient<Database>,
   locationId: string
 ) {
-  return client
-    .from("workCenters")
-    .select("*")
-    .eq("locationId", locationId)
-    .eq("active", true)
-    .order("name", { ascending: true });
+  // Query both views and merge - workCenters has processes, workCentersWithBlockingStatus has blocking info
+  const [workCentersResult, blockingStatusResult] = await Promise.all([
+    client
+      .from("workCenters")
+      .select("*")
+      .eq("locationId", locationId)
+      .eq("active", true)
+      .order("name", { ascending: true }),
+    client
+      .from("workCentersWithBlockingStatus")
+      .select("id, isBlocked, blockingDispatchId, blockingDispatchReadableId")
+      .eq("locationId", locationId)
+      .eq("active", true)
+  ]);
+
+  if (workCentersResult.error) {
+    return workCentersResult;
+  }
+
+  // Create a map of blocking status by work center id
+  const blockingStatusMap = new Map(
+    blockingStatusResult.data?.map((wc) => [wc.id, wc]) ?? []
+  );
+
+  // Merge the data
+  const mergedData = workCentersResult.data?.map((wc) => {
+    const blockingStatus = blockingStatusMap.get(wc.id);
+    return {
+      ...wc,
+      isBlocked: blockingStatus?.isBlocked ?? false,
+      blockingDispatchId: blockingStatus?.blockingDispatchId ?? null,
+      blockingDispatchReadableId:
+        blockingStatus?.blockingDispatchReadableId ?? null
+    };
+  });
+
+  return { data: mergedData, error: null };
 }
 
 export async function getWorkCentersByCompany(

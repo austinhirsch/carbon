@@ -21,9 +21,11 @@ import { path } from "~/utils/path";
 import {
   maintenanceDispatchPriority,
   maintenanceDispatchStatus,
-  maintenanceSource
+  maintenanceSource,
+  oeeImpact
 } from "../../production.models";
 import type { MaintenanceDispatch } from "../../types";
+import MaintenanceOeeImpact from "./MaintenanceOeeImpact";
 import MaintenancePriority from "./MaintenancePriority";
 import MaintenanceSource from "./MaintenanceSource";
 import MaintenanceStatus from "./MaintenanceStatus";
@@ -110,6 +112,24 @@ const MaintenanceDispatchesTable = memo(
               }))
             },
             pluralHeader: "Priorities"
+          }
+        },
+        {
+          accessorKey: "oeeImpact",
+          header: "OEE Impact",
+          cell: (item) => {
+            const impact = item.getValue<(typeof oeeImpact)[number]>();
+            return <MaintenanceOeeImpact oeeImpact={impact} />;
+          },
+          meta: {
+            icon: <LuChartNoAxesColumnIncreasing />,
+            filter: {
+              type: "static",
+              options: oeeImpact.map((impact) => ({
+                value: impact,
+                label: <MaintenanceOeeImpact oeeImpact={impact} />
+              }))
+            }
           }
         },
         {
