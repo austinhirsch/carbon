@@ -34,7 +34,7 @@ async function assertAuthSession(
 const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "carbon",
-    httpOnly: VERCEL_ENV === "production",
+    httpOnly: true, // Always use httpOnly for security
     path: "/",
     sameSite: "lax",
     secrets: [SESSION_SECRET],

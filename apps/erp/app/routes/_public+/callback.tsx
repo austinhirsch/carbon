@@ -52,9 +52,19 @@ export async function action({ request }: ActionFunctionArgs) {
     .select("companyId")
     .eq("userId", userId);
 
+  if (!companies.data || companies.data.length === 0) {
+    return redirect(
+      path.to.root,
+      await flash(
+        request,
+        error(null, "No companies found for user. Please contact support.")
+      )
+    );
+  }
+
   const authSession = await refreshAccessToken(
     refreshToken,
-    companies.data?.[0]?.companyId
+    companies.data[0].companyId
   );
 
   if (!authSession) {

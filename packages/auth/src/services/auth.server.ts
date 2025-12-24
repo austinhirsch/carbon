@@ -237,7 +237,12 @@ export async function signInWithEmail(email: string, password: string) {
   if (!data.session || error) return null;
   const companies = await getCompaniesForUser(client, data.user.id);
 
-  return makeAuthSession(data.session, companies?.[0]);
+  if (!companies || companies.length === 0) {
+    console.error(`User ${data.user.id} has no companies assigned`);
+    return null;
+  }
+
+  return makeAuthSession(data.session, companies[0]);
 }
 
 export async function refreshAccessToken(
@@ -245,6 +250,10 @@ export async function refreshAccessToken(
   companyId?: string
 ): Promise<AuthSession | null> {
   if (!refreshToken) return null;
+  if (!companyId) {
+    console.error("Cannot refresh access token without companyId");
+    return null;
+  }
 
   const client = getCarbonServiceRole();
 
@@ -254,7 +263,7 @@ export async function refreshAccessToken(
 
   if (!data.session || error) return null;
 
-  return makeAuthSession(data.session, companyId!);
+  return makeAuthSession(data.session, companyId);
 }
 
 export async function verifyAuthSession(authSession: AuthSession) {
