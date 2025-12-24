@@ -4,6 +4,7 @@ import {
   CONTROLLED_ENVIRONMENT,
   carbonClient,
   error,
+  getMESUrl,
   magicLinkValidator,
   RATE_LIMIT
 } from "@carbon/auth";
@@ -77,7 +78,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const user = await getUserByEmail(email);
 
   if (user.data && user.data.active) {
-    const magicLink = await sendMagicLink(email);
+    const magicLink = await sendMagicLink(email, getMESUrl());
 
     if (!magicLink) {
       return data(
