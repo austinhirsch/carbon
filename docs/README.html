@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>README</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+      margin-top: 30px;
+      page-break-after: avoid;
+    }
+
+    h2 {
+      color: #34495e;
+      border-bottom: 2px solid #95a5a6;
+      padding-bottom: 8px;
+      margin-top: 25px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      color: #555;
+      margin-top: 20px;
+      page-break-after: avoid;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9em;
+      color: #c7254e;
+    }
+
+    pre {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 4px;
+      page-break-inside: avoid;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #333;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    ul, ol {
+      margin: 15px 0;
+      padding-left: 30px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 15px 0;
+      text-align: justify;
+    }
+
+    strong {
+      color: #2c3e50;
+    }
+
+    .mermaid-diagram {
+      background: #f0f8ff;
+      border: 2px dashed #3498db;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      page-break-inside: avoid;
+    }
+
+    .mermaid-diagram pre {
+      background: #fff;
+      border-left-color: #95a5a6;
+      font-size: 0.85em;
+    }
+
+    .diagram-note {
+      color: #7f8c8d;
+      font-style: italic;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    @media print {
+      body {
+        max-width: none;
+      }
+
+      h1, h2, h3 {
+        page-break-after: avoid;
+      }
+
+      pre, table, .mermaid-diagram {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: #000;
+        text-decoration: underline;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Carbon Manufacturing System Documentation</h1>
+
+<p>This directory contains comprehensive documentation for the Carbon Manufacturing ERP/MES system.</p>
+
+<h2>Documentation Files</h2>
+
+<h3>📊 <a href="./database-schema.md">Database Schema</a></h3>
+Complete database schema documentation including:
+<ul><li>Entity Relationship Diagrams (ERD) for all modules</li>
+<li>Table structures and relationships</li>
+<li>Database patterns and conventions</li>
+<li>Multi-tenancy and security models</li>
+<li>Views, functions, and triggers</li>
+</ul>
+<h3>📋 <a href="./business-logic-rules.md">Business Logic Rules</a></h3>
+Comprehensive business logic documentation covering:
+<ul><li>Validation rules for all modules</li>
+<li>Status workflows and state transitions</li>
+<li>Required vs optional fields</li>
+<li>Calculated fields and formulas</li>
+<li>Side effects and cascading actions</li>
+<li>Cross-module business rules</li>
+</ul>
+<h2>Quick Reference</h2>
+
+<h3>Module Overview</h3>
+
+<table><thead><tr><th>Module</th><th>Purpose</th><th>Key Tables</th></tr></thead><tbody>
+<tr><td>--------</td><td>---------</td><td>------------</td></tr>
+
+<tr><td><strong>Sales</strong></td><td>Customer management, quotes, sales orders</td><td>customer, quote, salesOrder, opportunity</td></tr>
+
+<tr><td><strong>Purchasing</strong></td><td>Supplier management, purchase orders, receipts</td><td>supplier, purchaseOrder, receipt, buyMethod</td></tr>
+
+<tr><td><strong>Production</strong></td><td>Job management, MES, production planning</td><td>job, jobOperation, makeMethod, productionEvent</td></tr>
+
+<tr><td><strong>Inventory</strong></td><td>Stock management, tracking, transfers</td><td>item, itemLedger, trackedEntity, warehouse</td></tr>
+
+<tr><td><strong>Quality</strong></td><td>NCR, calibration, quality documents</td><td>nonConformance, gauge, qualityDocument</td></tr>
+
+<tr><td><strong>Maintenance</strong></td><td>Work orders, preventive maintenance</td><td>maintenanceDispatch, maintenanceSchedule</td></tr>
+
+<tr><td><strong>Accounting</strong></td><td>General ledger, cost tracking, ledgers</td><td>account, journal, itemLedger, costLedger</td></tr>
+
+<tr><td><strong>Resources</strong></td><td>Work centers, employees, departments</td><td>workCenter, employee, department, shift</td></tr></tbody></table>
+<h3>Core Concepts</h3>
+
+<p>#### Multi-Tenancy
+<ul><li>All business data is isolated by <code>companyId</code></li>
+<li>Row-Level Security (RLS) enforces company boundaries</li>
+<li>Composite primary keys: <code>PRIMARY KEY (id, companyId)</code></li>
+</ul>
+#### ID Generation
+<ul><li>Custom <code>xid()</code> function generates 20-character ordered unique IDs</li>
+<li>Readable IDs with revision system for parts/items</li>
+<li>Sequence-based IDs for documents (PO, SO, quotes, etc.)</li>
+</ul>
+#### Audit Trail
+Standard fields on all business tables:
+<pre><code class="language-sql">createdBy, createdAt, updatedBy, updatedAt
+</code></pre></p>
+
+<p>#### Extensibility
+<ul><li><code>customFields JSONB</code> for flexible custom data</li>
+<li><code>tags TEXT[]</code> for categorization</li>
+<li>Attribute system for custom fields with UI</li>
+</ul>
+<h3>Key Workflows</h3></p>
+
+<p>#### Sales Flow
+<pre><code class="language-">Customer → Opportunity → RFQ → Quote → Sales Order → Shipment → Invoice
+</code></pre></p>
+
+<p>#### Purchasing Flow
+<pre><code class="language-">Supplier → Supplier Quote → Purchase Order → Receipt → Invoice
+</code></pre></p>
+
+<p>#### Production Flow
+<pre><code class="language-">Item → Make Method → Job → Job Operations → Production Events → Completion
+</code></pre></p>
+
+<p>#### Inventory Flow
+<pre><code class="language-">Receipt/Production → Item Ledger → Cost Ledger → On-Hand Quantities
+</code></pre></p>
+
+<h3>Database Technology</h3>
+
+<ul><li><strong>Database</strong>: PostgreSQL via Supabase</li>
+<li><strong>Type Safety</strong>: Full TypeScript types generated from schema</li>
+<li><strong>Real-time</strong>: Supabase real-time subscriptions on key tables</li>
+<li><strong>Security</strong>: Row-Level Security (RLS) policies on all tables</li>
+<li><strong>Storage</strong>: Supabase Storage buckets for files/documents</li>
+</ul>
+<h3>Common Patterns</h3>
+
+<p>#### Status Workflows
+Most documents follow similar status patterns:
+<ul><li>Draft → Pending/Planned → In Progress → Completed</li>
+<li>Can transition to Cancelled from most states</li>
+</ul>
+#### Conversion Factors
+Handle different units between inventory and purchasing:
+<pre><code class="language-">Inventory unit price = (Purchase unit price × Exchange rate) / Conversion factor
+</code></pre></p>
+
+<p>#### Revision System
+Items support multiple revisions:
+<ul><li>Same <code>readableId</code>, different <code>revision</code> numbers</li>
+<li>Default revision is '0'</li>
+<li>Display format: <code>readableId.revision</code> (except for revision 0)</li>
+</ul>
+#### Tracked Entities
+Serial/batch tracking with full traceability:
+<ul><li>Forward tracing: Where did this material go?</li>
+<li>Backward tracing: Where did this come from?</li>
+<li>Forms a directed acyclic graph (DAG)</li>
+</ul>
+<h3>MRP (Material Requirements Planning)</h3></p>
+
+<p>Automated planning system that:
+<ul><li>Runs every 3 hours automatically</li>
+<li>Calculates demand from sales orders and jobs</li>
+<li>Calculates supply from production orders and purchase orders</li>
+<li>Creates planning recommendations by location and period</li>
+</ul>
+<h3>Integration Points</h3></p>
+
+<ul><li><strong>API</strong>: RESTful API with webhooks</li>
+<li><strong>OAuth</strong>: Support for third-party integrations</li>
+<li><strong>CAD</strong>: Onshape integration for parts/models</li>
+<li><strong>Messaging</strong>: Slack integration for notifications</li>
+<li><strong>Accounting</strong>: QuickBooks integration</li>
+<li><strong>Other</strong>: Linear, Paperless Parts, Radan integrations</li>
+</ul>
+<h2>For Developers</h2>
+
+<h3>Creating Migrations</h3>
+
+<pre><code class="language-bash"><h1>Create new migration</h1>
+npm run db:migrate <name-of-migration>
+
+<h1>Apply migrations</h1>
+npm run db:push
+</code></pre>
+
+<h3>Migration Best Practices</h3>
+
+<ul><li>Always include RLS policies</li>
+<li>Use composite primary keys for multi-tenant tables</li>
+<li>Include indexes on foreign keys and <code>companyId</code></li>
+<li>Use <code>ON DELETE CASCADE</code> for child records</li>
+<li>Use <code>ON DELETE SET NULL</code> for optional relationships</li>
+<li>Follow naming convention: <code>YYYYMMDDHHMMSS_description.sql</code></li>
+</ul>
+<h3>Validation with Zod</h3>
+
+<p>Each table should have corresponding <code>.models.ts</code> file with:
+<ul><li>Base validator matching database schema</li>
+<li>Form validator for create/update operations</li>
+<li>Exclusion of audit fields from forms</li>
+</ul>
+Example:
+<pre><code class="language-typescript">export const baseValidator = z.object({
+  id: z.string(),
+  companyId: z.string(),
+  name: z.string().min(1),
+  // ... other fields
+  createdBy: z.string(),
+  createdAt: z.date(),
+});</p>
+
+<p>export const formValidator = baseValidator
+  .omit({ id: true, createdBy: true, createdAt: true, updatedBy: true, updatedAt: true })
+  .extend({
+    // Form-specific validations
+  });
+</code></pre></p>
+
+<h2>For Users</h2>
+
+<h3>Understanding Status Workflows</h3>
+
+<p>Each module has specific status workflows that control how documents progress:</p>
+
+<ul><li><strong>Sales Orders</strong>: Draft → Needs Approval → To Ship → Completed</li>
+<li><strong>Purchase Orders</strong>: Draft → To Review → To Receive → Completed</li>
+<li><strong>Jobs</strong>: Draft → Ready → In Progress → Completed</li>
+<li><strong>Quotes</strong>: Draft → Sent → Ordered/Lost/Cancelled</li>
+</ul>
+See the <a href="./business-logic-rules.md">Business Logic Rules</a> document for complete workflow details.
+
+<h3>Custom Fields</h3>
+
+<p>The system supports custom fields via:
+<ul><li>JSONB <code>customFields</code> column on most tables</li>
+<li>Attribute system with typed custom fields</li>
+<li>User-defined validation and UI rendering</li>
+</ul>
+<h3>Traceability</h3></p>
+
+<p>Full forward and backward traceability for:
+<ul><li>Serial number tracked items</li>
+<li>Batch/lot tracked items</li>
+<li>Material consumption in production</li>
+<li>Genealogy tracking through the entire production process</li>
+</ul>
+<h2>Architecture Highlights</h2></p>
+
+<h3>Real-time Updates</h3>
+
+<p>Tables enabled for real-time subscriptions:
+<ul><li>item, part</li>
+<li>journal</li>
+<li>receipt</li>
+<li>salesOrderLine</li>
+<li>job</li>
+<li>productionEvent</li>
+</ul>
+<h3>Performance Optimization</h3></p>
+
+<ul><li>Materialized views for complex queries</li>
+<li>Indexes on all foreign keys and frequently queried columns</li>
+<li>Efficient RLS policies using helper functions</li>
+<li>Caching of frequently accessed data</li>
+</ul>
+<h3>Security</h3>
+
+<ul><li>Row-Level Security (RLS) on all business tables</li>
+<li>Module-based permissions (sales, purchasing, production, etc.)</li>
+<li>Action-based permissions (view, create, update, delete)</li>
+<li>API key access for external integrations</li>
+<li>Audit trail on all modifications</li>
+</ul>
+<h2>Additional Resources</h2>
+
+<ul><li><strong>Cache Files</strong>: <code>/llm/cache/</code> - Detailed codebase knowledge for AI assistants</li>
+<li><strong>Workflows</strong>: <code>/llm/workflows/</code> - Standardized development workflows</li>
+<li><strong>Migrations</strong>: <code>/packages/database/supabase/migrations/</code> - All database migrations</li>
+</ul>
+<h2>Contributing</h2>
+
+<p>When updating documentation:</p>
+
+<ul><li>Keep diagrams in sync with actual schema</li>
+<li>Update business logic rules when validation changes</li>
+<li>Document new features and their workflows</li>
+<li>Include examples for complex concepts</li>
+<li>Update this README when adding new documentation files</li>
+</ul>
+<h2>Version Information</h2>
+
+<ul><li><strong>Last Updated</strong>: 2026-01-16</li>
+<li><strong>Database</strong>: PostgreSQL 15+ via Supabase</li>
+<li><strong>Schema Version</strong>: See latest migration timestamp</li>
+</ul>
+---
+
+<p>For questions or clarifications, refer to the detailed documentation files linked above or consult the codebase directly.
+</p>
+
+  <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 0.9em;">
+    <p>Generated from Carbon Manufacturing System Documentation</p>
+    <p>To convert to PDF: Use your browser's Print function (Ctrl+P or Cmd+P) and select "Save as PDF"</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Schema</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+      margin-top: 30px;
+      page-break-after: avoid;
+    }
+
+    h2 {
+      color: #34495e;
+      border-bottom: 2px solid #95a5a6;
+      padding-bottom: 8px;
+      margin-top: 25px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      color: #555;
+      margin-top: 20px;
+      page-break-after: avoid;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9em;
+      color: #c7254e;
+    }
+
+    pre {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 4px;
+      page-break-inside: avoid;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #333;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    ul, ol {
+      margin: 15px 0;
+      padding-left: 30px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 15px 0;
+      text-align: justify;
+    }
+
+    strong {
+      color: #2c3e50;
+    }
+
+    .mermaid-diagram {
+      background: #f0f8ff;
+      border: 2px dashed #3498db;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      page-break-inside: avoid;
+    }
+
+    .mermaid-diagram pre {
+      background: #fff;
+      border-left-color: #95a5a6;
+      font-size: 0.85em;
+    }
+
+    .diagram-note {
+      color: #7f8c8d;
+      font-style: italic;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    @media print {
+      body {
+        max-width: none;
+      }
+
+      h1, h2, h3 {
+        page-break-after: avoid;
+      }
+
+      pre, table, .mermaid-diagram {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: #000;
+        text-decoration: underline;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Carbon Manufacturing System - Database Schema Documentation</h1>
+
+<h2>Overview</h2>
+
+<p>This document provides a comprehensive overview of the Carbon Manufacturing ERP/MES database schema, including all tables, relationships, and entity diagrams organized by functional module.</p>
+
+<h2>Database Technology</h2>
+
+<ul><li><strong>Database</strong>: PostgreSQL (via Supabase)</li>
+<li><strong>ID Generation</strong>: Custom <code>xid()</code> function - 20-character ordered unique IDs</li>
+<li><strong>Multi-Tenancy</strong>: Company-based isolation with Row-Level Security (RLS)</li>
+<li><strong>Real-time</strong>: Supabase real-time subscriptions enabled on key tables</li>
+<li><strong>Type Safety</strong>: Full TypeScript types generated from database schema</li>
+</ul>
+<h2>Core Patterns</h2>
+
+<h3>Multi-Tenancy Pattern</h3>
+All business tables follow this structure:
+<pre><code class="language-sql">CREATE TABLE "tableName" (
+  "id" TEXT NOT NULL DEFAULT xid(),
+  "companyId" TEXT NOT NULL REFERENCES "company"("id") ON DELETE CASCADE,
+  -- other fields --
+  PRIMARY KEY ("id", "companyId")
+);
+CREATE INDEX "tableName_companyId_idx" ON "tableName"("companyId");
+</code></pre>
+
+<h3>Audit Trail Pattern</h3>
+Standard audit fields on most tables:
+<pre><code class="language-sql">"createdBy" TEXT NOT NULL REFERENCES "user"("id"),
+"createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+"updatedBy" TEXT REFERENCES "user"("id"),
+"updatedAt" TIMESTAMP WITH TIME ZONE
+</code></pre>
+
+<h3>Extensibility Pattern</h3>
+<pre><code class="language-sql">"customFields" JSONB,
+"tags" TEXT[]
+</code></pre>
+
+<p>---</p>
+
+<h2>Entity Relationship Diagrams by Module</h2>
+
+<h3>1. Core System & Authentication</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    company ||--o{ user : "has"
+    company ||--o{ employee : "has"
+    company ||--o{ location : "has"
+    company ||--o{ currency : "defines"
+
+<p>    user ||--o{ userToCompany : "belongs to"
+    company ||--o{ userToCompany : "has"
+    user ||--o{ userPermission : "has"
+    user ||--o{ group : "belongs to"</p>
+
+<p>    employee <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> employeeType : "has"
+    employeeType ||--o{ employeeTypePermission : "has"</p>
+
+<p>    location ||--o{ warehouse : "contains"
+    location ||--o{ department : "contains"
+    location ||--o{ shift : "operates"</p>
+
+<p>    company {
+        text id PK
+        text name
+        text taxId
+        text logo
+        jsonb contact
+    }</p>
+
+<p>    user {
+        text id PK
+        text email
+        text firstName
+        text lastName
+        text fullName
+        text avatarUrl
+        boolean active
+    }</p>
+
+<p>    employee {
+        text id PK
+        text companyId FK
+        text employeeTypeId FK
+        text userId FK
+    }</p>
+
+<p>    location {
+        text id PK
+        text companyId FK
+        text name
+        text timezone
+        decimal latitude
+        decimal longitude
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>2. Items & Parts Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    item <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> part : "is"
+    item <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> material : "is"
+    item <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> tool : "is"
+    item <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> consumable : "is"
+
+<p>    item <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> itemCost : "has"
+    item <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> itemReplenishment : "has"
+    item <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> itemUnitSalePrice : "has"
+    item ||--o{ itemPlanning : "has per location"
+    item ||--o{ pickMethod : "has per location"</p>
+
+<p>    item ||--o{ makeMethod : "has manufacturing method"
+    makeMethod ||--o{ methodOperation : "has operations"
+    makeMethod ||--o{ methodMaterial : "has materials"</p>
+
+<p>    item ||--o{ buyMethod : "sourced from suppliers"
+    supplier ||--o{ buyMethod : "supplies items"</p>
+
+<p>    itemCost <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> itemPostingGroup : "belongs to"</p>
+
+<p>    item {
+        text id PK
+        text readableId
+        text revision
+        text companyId FK
+        text name
+        text description
+        enum type
+        enum replenishmentSystem
+        enum itemTrackingType
+        text unitOfMeasureCode
+        text thumbnailUrl
+    }</p>
+
+<p>    itemCost {
+        text itemId FK
+        text companyId FK
+        enum costingMethod
+        numeric standardCost
+        numeric unitCost
+        text itemPostingGroupId FK
+    }</p>
+
+<p>    makeMethod {
+        text id PK
+        text itemId FK
+        text companyId FK
+        int version
+    }</p>
+
+<p>    methodOperation {
+        text id PK
+        text makeMethodId FK
+        int order
+        text workCellTypeId FK
+        numeric setupHours
+        numeric productionStandard
+    }</p>
+
+<p>    methodMaterial {
+        text id PK
+        text makeMethodId FK
+        text itemId FK
+        enum methodType
+        numeric quantity
+        text unitOfMeasureCode
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>3. Sales Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    customer ||--o{ customerLocation : "has"
+    customer ||--o{ customerContact : "has"
+    customer <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> customerPayment : "has settings"
+    customer <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> customerShipping : "has settings"
+    customer ||--o{ customerAccount : "has portal access"
+
+<p>    customer ||--o{ opportunity : "has"
+    customer ||--o{ salesRfq : "requests quotes"
+    customer ||--o{ quote : "receives"
+    customer ||--o{ salesOrder : "places"</p>
+
+<p>    salesRfq ||--o{ salesRfqLine : "contains"
+    salesRfq ||--o{ quote : "generates"</p>
+
+<p>    quote ||--o{ quoteLine : "contains"
+    quoteLine ||--o{ quoteMaterial : "has BOM"
+    quoteLine ||--o{ quoteOperation : "has operations"
+    quoteLine ||--o{ quoteMakeMethod : "has method tree"</p>
+
+<p>    quote ||--o{ salesOrder : "converts to"
+    salesOrder ||--o{ salesOrderLine : "contains"
+    salesOrder ||--o{ shipment : "ships via"</p>
+
+<p>    customer {
+        text id PK
+        text companyId FK
+        text name
+        text customerTypeId FK
+        text customerStatusId FK
+        text accountManagerId FK
+        text currencyCode
+    }</p>
+
+<p>    quote {
+        text id PK
+        text quoteId
+        int revisionId
+        text companyId FK
+        text customerId FK
+        enum status
+        date expirationDate
+        text assignee
+    }</p>
+
+<p>    quoteLine {
+        text id PK
+        text quoteId FK
+        text companyId FK
+        text itemId FK
+        enum status
+        enum methodType
+        text description
+        numeric[] quantities
+    }</p>
+
+<p>    salesOrder {
+        text id PK
+        text salesOrderId
+        int revisionId
+        text companyId FK
+        text customerId FK
+        enum status
+        date orderDate
+        text currencyCode
+    }</p>
+
+<p>    salesOrderLine {
+        text id PK
+        text salesOrderId FK
+        enum lineType
+        text itemId FK
+        numeric saleQuantity
+        numeric unitPrice
+        text locationId FK
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>4. Purchasing Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    supplier ||--o{ supplierLocation : "has"
+    supplier ||--o{ supplierContact : "has"
+    supplier <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> supplierPayment : "has settings"
+    supplier <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> supplierShipping : "has settings"
+    supplier ||--o{ supplierAccount : "has portal access"
+
+<p>    supplier ||--o{ buyMethod : "supplies items"
+    item ||--o{ buyMethod : "sourced from"</p>
+
+<p>    supplier ||--o{ supplierQuote : "provides"
+    supplierQuote ||--o{ supplierQuoteLine : "contains"</p>
+
+<p>    supplier ||--o{ purchaseOrder : "receives"
+    purchaseOrder ||--o{ purchaseOrderLine : "contains"
+    purchaseOrder ||--o{ receipt : "received via"</p>
+
+<p>    supplier {
+        text id PK
+        text companyId FK
+        text name
+        text supplierTypeId FK
+        text supplierStatusId FK
+        text accountManagerId FK
+        text currencyCode
+    }</p>
+
+<p>    buyMethod {
+        text id PK
+        text itemId FK
+        text supplierId FK
+        text companyId FK
+        text supplierPartId
+        numeric minimumOrderQuantity
+        numeric conversionFactor
+    }</p>
+
+<p>    purchaseOrder {
+        text id PK
+        text purchaseOrderId
+        int revisionId
+        text companyId FK
+        text supplierId FK
+        enum type
+        enum status
+        date orderDate
+    }</p>
+
+<p>    purchaseOrderLine {
+        text id PK
+        text purchaseOrderId FK
+        enum lineType
+        text itemId FK
+        numeric purchaseQuantity
+        numeric unitPrice
+        text locationId FK
+    }</p>
+
+<p>    receipt {
+        text id PK
+        text receiptId
+        text companyId FK
+        text locationId FK
+        enum sourceDocument
+        text sourceDocumentId
+        enum status
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>5. Production/MES Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    job ||--o{ jobOperation : "has"
+    job ||--o{ jobMaterial : "requires"
+    job <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> salesOrderLine : "fulfills"
+    job <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> item : "produces"
+
+<p>    jobOperation ||--o{ jobOperationAssignment : "assigned to"
+    jobOperation ||--o{ jobOperationStep : "has steps"
+    jobOperation ||--o{ productionEvent : "tracked by"</p>
+
+<p>    jobOperation <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> process : "uses"
+    jobOperation <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> workCenter : "performed at"</p>
+
+<p>    employee ||--o{ jobOperationAssignment : "assigned"</p>
+
+<p>    workCenter <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> workCellType : "is type"
+    workCenter <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> location : "located at"
+    workCenter <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> department : "belongs to"</p>
+
+<p>    process ||--o{ processParameter : "has parameters"</p>
+
+<p>    job {
+        text id PK
+        text jobId
+        text companyId FK
+        text itemId FK
+        text customerId FK
+        text locationId FK
+        enum status
+        enum deadlineType
+        date dueDate
+        numeric quantity
+        numeric quantityComplete
+    }</p>
+
+<p>    jobOperation {
+        text id PK
+        text jobId FK
+        text companyId FK
+        int order
+        text processId FK
+        text workCenterId FK
+        numeric setupTime
+        numeric laborTime
+        numeric machineTime
+        enum operationOrder
+    }</p>
+
+<p>    jobMaterial {
+        text id PK
+        text jobId FK
+        text itemId FK
+        enum methodType
+        numeric quantity
+        text jobOperationId FK
+    }</p>
+
+<p>    productionEvent {
+        text id PK
+        text jobOperationId FK
+        text employeeId FK
+        timestamp startTime
+        timestamp endTime
+        text eventType
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>6. Inventory Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    warehouse ||--o{ shelf : "contains"
+    location ||--o{ warehouse : "has"
+
+<p>    receipt ||--o{ receiptLine : "contains"
+    shipment ||--o{ shipmentLine : "contains"</p>
+
+<p>    receiptLine <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> item : "receives"
+    shipmentLine <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> item : "ships"</p>
+
+<p>    item ||--o{ itemLedger : "tracked in"
+    itemLedger <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> location : "at location"
+    itemLedger <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> shelf : "on shelf"
+    itemLedger <table><thead><tr><th>--o</th></tr></thead><tbody></tbody></table> trackedEntity : "tracked by"</p>
+
+<p>    itemLedger ||--o{ costLedger : "valued by"</p>
+
+<p>    trackedEntity ||--o{ serialNumber : "is serial"
+    trackedEntity ||--o{ batchNumber : "is batch"</p>
+
+<p>    warehouse {
+        text id PK
+        text companyId FK
+        text name
+        text locationId FK
+        boolean requiresPick
+        boolean requiresReceive
+        boolean requiresShipment
+    }</p>
+
+<p>    itemLedger {
+        text id PK
+        int entryNumber
+        text companyId FK
+        date postingDate
+        enum entryType
+        enum documentType
+        text documentId
+        text itemId FK
+        text locationId FK
+        numeric quantity
+    }</p>
+
+<p>    trackedEntity {
+        text id PK
+        text companyId FK
+        text itemId FK
+        numeric quantity
+        enum status
+        jsonb attributes
+        text sourceDocument
+        text sourceDocumentId
+    }</p>
+
+<p>    serialNumber {
+        text id PK
+        text serialNumber
+        text itemId FK
+        text locationId FK
+        text shelfId FK
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>7. Quality Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    nonConformance ||--o{ investigationTask : "has"
+    nonConformance ||--o{ actionTask : "has"
+    nonConformance ||--o{ approvalTask : "has"
+
+<p>    nonConformance ||--o{ ncrReviewer : "has reviewers"</p>
+
+<p>    qualityDocument ||--o{ qualityDocumentVersion : "has versions"
+    qualityDocumentVersion ||--o{ procedure : "defines"
+    procedure ||--o{ procedureStep : "has steps"</p>
+
+<p>    gauge ||--o{ gaugeCalibration : "has calibrations"
+    gaugeCalibration ||--o{ gaugeCalibrationRecord : "recorded in"</p>
+
+<p>    nonConformance {
+        text id PK
+        text companyId FK
+        text name
+        enum priority
+        enum source
+        enum status
+        text locationId FK
+        date openDate
+        date closeDate
+        text description
+    }</p>
+
+<p>    investigationTask {
+        text id PK
+        text nonConformanceId FK
+        text companyId FK
+        enum status
+        text investigationTypeId FK
+        text assignee
+    }</p>
+
+<p>    actionTask {
+        text id PK
+        text nonConformanceId FK
+        text companyId FK
+        enum status
+        text actionTypeId FK
+        text assignee
+    }</p>
+
+<p>    gauge {
+        text id PK
+        text companyId FK
+        text gaugeType
+        enum role
+        int calibrationInterval
+        date lastCalibrationDate
+        date nextCalibrationDate
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>8. Maintenance Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    workCenter ||--o{ maintenanceDispatch : "has"
+    workCenter ||--o{ maintenanceSchedule : "has schedule"
+
+<p>    maintenanceSchedule ||--o{ maintenanceScheduleItem : "requires items"
+    maintenanceSchedule ||--o{ maintenanceDispatch : "generates"</p>
+
+<p>    maintenanceDispatch ||--o{ maintenanceEvent : "tracked by"
+    maintenanceDispatch ||--o{ maintenanceItem : "consumes"</p>
+
+<p>    employee ||--o{ maintenanceEvent : "performs"</p>
+
+<p>    maintenanceDispatch {
+        text id PK
+        text maintenanceDispatchId
+        text companyId FK
+        text content
+        enum status
+        enum priority
+        enum source
+        enum severity
+        text workCenterId FK
+        timestamp plannedStartTime
+    }</p>
+
+<p>    maintenanceSchedule {
+        text id PK
+        text companyId FK
+        text name
+        text workCenterId FK
+        enum frequency
+        enum priority
+        numeric estimatedDuration
+        timestamp nextDueAt
+    }</p>
+
+<p>    maintenanceEvent {
+        text id PK
+        text maintenanceDispatchId FK
+        text employeeId FK
+        text workCenterId FK
+        timestamp startTime
+        timestamp endTime
+        text notes
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>9. Accounting Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    accountCategory ||--o{ accountSubcategory : "has"
+    accountSubcategory ||--o{ account : "contains"
+
+<p>    account ||--o{ journalLine : "posted to"
+    journal ||--o{ journalLine : "contains"</p>
+
+<p>    accountingPeriod ||--o{ journal : "contains"</p>
+
+<p>    itemLedger ||--o{ costLedger : "valued by"
+    costLedger <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> account : "posts to"</p>
+
+<p>    supplier ||--o{ supplierLedger : "has entries"
+    customer ||--o{ customerLedger : "has entries"</p>
+
+<p>    account {
+        text number PK
+        text companyId FK
+        text name
+        enum type
+        enum class
+        enum incomeBalance
+        text accountCategoryId FK
+        boolean directPosting
+    }</p>
+
+<p>    journal {
+        text id PK
+        text companyId FK
+        text description
+        text accountingPeriodId FK
+        date postingDate
+    }</p>
+
+<p>    journalLine {
+        text id PK
+        text journalId FK
+        text accountNumber FK
+        text description
+        numeric amount
+        enum documentType
+        text documentId
+    }</p>
+
+<p>    costLedger {
+        text id PK
+        text companyId FK
+        enum itemLedgerType
+        enum costLedgerType
+        numeric cost
+        numeric costPostedToGL
+        text itemId FK
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<h3>10. Resources Module</h3>
+
+<div class="mermaid-diagram"><pre>erDiagram
+    department ||--o{ department : "has sub-departments"
+    department ||--o{ workCell : "contains"
+
+<p>    workCellType ||--o{ workCell : "defines"
+    workCell ||--o{ equipment : "has"</p>
+
+<p>    location ||--o{ shift : "operates"
+    shift ||--o{ employeeShift : "assigned to"
+    employee ||--o{ employeeShift : "works"</p>
+
+<p>    employee <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> employeeJob : "has job details"
+    employeeJob <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> department : "in department"
+    employeeJob <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> workCell : "assigned to"</p>
+
+<p>    employee ||--o{ employeeAbility : "has skills"
+    ability ||--o{ employeeAbility : "possessed by"</p>
+
+<p>    crew ||--o{ employee : "contains"
+    crew <table><thead><tr><th>--</th></tr></thead><tbody></tbody></table> workCell : "assigned to"</p>
+
+<p>    department {
+        text id PK
+        text companyId FK
+        text name
+        text parentDepartmentId FK
+    }</p>
+
+<p>    workCellType {
+        text id PK
+        text companyId FK
+        text name
+        text requiredAbility
+        numeric quotingRate
+        numeric laborRate
+        numeric overheadRate
+    }</p>
+
+<p>    workCell {
+        text id PK
+        text companyId FK
+        text name
+        text departmentId FK
+        text locationId FK
+        text workCellTypeId FK
+    }</p>
+
+<p>    shift {
+        text id PK
+        text companyId FK
+        text name
+        time startTime
+        time endTime
+        text locationId FK
+        boolean monday
+        boolean tuesday
+        boolean wednesday
+        boolean thursday
+        boolean friday
+        boolean saturday
+        boolean sunday
+    }
+</pre><p class="diagram-note">Note: This is a Mermaid diagram. View the original markdown file or use a Mermaid viewer to see the visual diagram.</p></div></p>
+
+<p>---</p>
+
+<h2>Key Relationships Summary</h2>
+
+<h3>Item/Part Hierarchy</h3>
+<ul><li><code>item</code> (master) → <code>part</code>, <code>material</code>, <code>tool</code>, <code>consumable</code> (type-specific data)</li>
+<li><code>item</code> → <code>itemCost</code>, <code>itemReplenishment</code>, <code>itemUnitSalePrice</code> (1:1)</li>
+<li><code>item</code> → <code>itemPlanning</code> (1:many per location)</li>
+<li><code>item</code> → <code>makeMethod</code> → <code>methodOperation</code>, <code>methodMaterial</code> (manufacturing BOM)</li>
+<li><code>item</code> → <code>buyMethod</code> → <code>supplier</code> (purchasing)</li>
+</ul>
+<h3>Sales Flow</h3>
+<ul><li><code>customer</code> → <code>opportunity</code> → <code>salesRfq</code> → <code>quote</code> → <code>salesOrder</code> → <code>shipment</code></li>
+<li><code>quote</code> → <code>quoteLine</code> → <code>quoteMaterial</code>, <code>quoteOperation</code>, <code>quoteMakeMethod</code></li>
+<li><code>salesOrder</code> → <code>salesOrderLine</code> → <code>job</code> (production)</li>
+</ul>
+<h3>Purchasing Flow</h3>
+<ul><li><code>supplier</code> → <code>buyMethod</code> (item sourcing)</li>
+<li><code>supplier</code> → <code>purchaseOrder</code> → <code>purchaseOrderLine</code> → <code>receipt</code></li>
+</ul>
+<h3>Production Flow</h3>
+<ul><li><code>job</code> → <code>jobOperation</code> → <code>jobMaterial</code></li>
+<li><code>jobOperation</code> → <code>process</code>, <code>workCenter</code></li>
+<li><code>jobOperation</code> → <code>productionEvent</code> (MES tracking)</li>
+</ul>
+<h3>Inventory Flow</h3>
+<ul><li><code>receipt</code>, <code>shipment</code> → <code>itemLedger</code> (quantity tracking)</li>
+<li><code>itemLedger</code> → <code>costLedger</code> (valuation)</li>
+<li><code>itemLedger</code> → <code>trackedEntity</code> → <code>serialNumber</code>, <code>batchNumber</code></li>
+</ul>
+<h3>Location Hierarchy</h3>
+<ul><li><code>company</code> → <code>location</code> → <code>warehouse</code> → <code>shelf</code></li>
+<li><code>location</code> → <code>department</code> → <code>workCell</code></li>
+<li><code>location</code> → <code>shift</code></li>
+</ul>
+---
+
+<h2>Database Functions & Triggers</h2>
+
+<h3>Custom Functions</h3>
+<ul><li><code>xid()</code> - Generate ordered 20-character unique IDs</li>
+<li><code>has_role()</code> - Check user role in company</li>
+<li><code>has_company_permission()</code> - Check user permission</li>
+<li><code>get_companies_with_employee_permission()</code> - Get accessible companies for user</li>
+</ul>
+<h3>Key Triggers</h3>
+<ul><li>Auto-create related records on item creation (cost, replenishment, pricing)</li>
+<li>Auto-create makeMethod for parts/tools</li>
+<li>Update search index on record changes</li>
+<li>Audit trail updates (updatedBy, updatedAt)</li>
+</ul>
+---
+
+<h2>Row-Level Security (RLS)</h2>
+
+<p>All business tables implement RLS policies:
+<ul><li><strong>SELECT</strong>: Users can view records in companies they have permission to</li>
+<li><strong>INSERT</strong>: Users can create records in companies they have employee permission</li>
+<li><strong>UPDATE</strong>: Users can update records they have permission for</li>
+<li><strong>DELETE</strong>: Users can delete records they have permission for</li>
+</ul>
+Policy naming convention (2025+):
+<ul><li><code>"SELECT"</code> - View policy</li>
+<li><code>"INSERT"</code> - Create policy</li>
+<li><code>"UPDATE"</code> - Update policy</li>
+<li><code>"DELETE"</code> - Delete policy</li>
+</ul>
+---</p>
+
+<h2>Views</h2>
+
+<p>Major aggregated views with proper RLS:
+<ul><li><code>parts</code> - Items with part details</li>
+<li><code>suppliers</code> - Suppliers with type, status, counts</li>
+<li><code>customers</code> - Customers with type, status, counts</li>
+<li><code>quotes</code> - Quotes with customer, assignee details</li>
+<li><code>salesOrders</code> - Sales orders with customer, status</li>
+<li><code>jobs</code> - Jobs with item, customer, operation counts</li>
+<li><code>itemQuantities</code> - Current inventory by item/location</li>
+<li><code>itemQuantitiesByTrackingId</code> - Inventory by serial/batch</li>
+</ul>
+---</p>
+
+<h2>Realtime-Enabled Tables</h2>
+
+<p>Tables with Supabase realtime enabled:
+<ul><li><code>item</code></li>
+<li><code>part</code></li>
+<li><code>journal</code></li>
+<li><code>receipt</code></li>
+<li><code>salesOrderLine</code></li>
+<li><code>job</code></li>
+<li><code>productionEvent</code></li>
+</ul>
+---</p>
+
+<h2>Migration Conventions</h2>
+
+<h3>File Naming</h3>
+Format: <code>YYYYMMDDHHMMSS_description.sql</code>
+
+<h3>Migration Commands</h3>
+<pre><code class="language-bash"><h1>Create new migration</h1>
+npm run db:migrate <name-of-migration>
+
+<h1>Apply migrations</h1>
+npm run db:push
+</code></pre>
+
+<h3>Best Practices</h3>
+<ul><li>Always include RLS policies</li>
+<li>Use composite primary keys for multi-tenant tables</li>
+<li>Include indexes on foreign keys and companyId</li>
+<li>Use ON DELETE CASCADE for child records</li>
+<li>Use ON DELETE SET NULL for optional relationships</li>
+</ul>
+
+  <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 0.9em;">
+    <p>Generated from Carbon Manufacturing System Documentation</p>
+    <p>To convert to PDF: Use your browser's Print function (Ctrl+P or Cmd+P) and select "Save as PDF"</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Logic Rules</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+      margin-top: 30px;
+      page-break-after: avoid;
+    }
+
+    h2 {
+      color: #34495e;
+      border-bottom: 2px solid #95a5a6;
+      padding-bottom: 8px;
+      margin-top: 25px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      color: #555;
+      margin-top: 20px;
+      page-break-after: avoid;
+    }
+
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9em;
+      color: #c7254e;
+    }
+
+    pre {
+      background: #f8f8f8;
+      border: 1px solid #ddd;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 4px;
+      page-break-inside: avoid;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #333;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 20px 0;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    ul, ol {
+      margin: 15px 0;
+      padding-left: 30px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 15px 0;
+      text-align: justify;
+    }
+
+    strong {
+      color: #2c3e50;
+    }
+
+    .mermaid-diagram {
+      background: #f0f8ff;
+      border: 2px dashed #3498db;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      page-break-inside: avoid;
+    }
+
+    .mermaid-diagram pre {
+      background: #fff;
+      border-left-color: #95a5a6;
+      font-size: 0.85em;
+    }
+
+    .diagram-note {
+      color: #7f8c8d;
+      font-style: italic;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    @media print {
+      body {
+        max-width: none;
+      }
+
+      h1, h2, h3 {
+        page-break-after: avoid;
+      }
+
+      pre, table, .mermaid-diagram {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: #000;
+        text-decoration: underline;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Carbon Manufacturing System - Business Logic Rules</h1>
+
+<h2>Overview</h2>
+
+<p>This document provides comprehensive documentation of business logic rules, validation constraints, status workflows, calculated fields, and side effects across all modules in the Carbon ERP/MES system.</p>
+
+<p>---</p>
+
+<h2>Table of Contents</h2>
+
+<ul><li><a href="#1-sales-module">Sales Module</a></li>
+<li><a href="#2-purchasing-module">Purchasing Module</a></li>
+<li><a href="#3-production-module">Production Module</a></li>
+<li><a href="#4-inventory-module">Inventory Module</a></li>
+<li><a href="#5-quality-module">Quality Module</a></li>
+<li><a href="#6-maintenance-module">Maintenance Module</a></li>
+<li><a href="#7-accounting-module">Accounting Module</a></li>
+<li><a href="#8-cross-module-business-rules">Cross-Module Business Rules</a></li>
+<li><a href="#9-key-automations--triggers">Key Automations & Triggers</a></li>
+</ul>
+---
+
+<h2>1. SALES MODULE</h2>
+
+<h3>1.1 Customer Management</h3>
+
+<strong>Validation Rules:</strong>
+<ul><li>Customer name: Required (min 1 character)</li>
+<li>Tax percent: Must be between 0 and 1 (0-100%)</li>
+<li>Currency code: Optional</li>
+<li>Account manager, contacts, locations: Optional references</li>
+</ul>
+<strong>Required Fields:</strong>
+<ul><li>Name</li>
+<li>Company ID (auto-assigned)</li>
+</ul>
+<strong>Optional Fields:</strong>
+<ul><li>Customer status, type</li>
+<li>Account manager</li>
+<li>Currency code</li>
+<li>Tax percent</li>
+<li>Sales/invoicing contacts</li>
+<li>Website</li>
+</ul>
+<strong>Business Constraints:</strong>
+<ul><li>Customers can have multiple locations</li>
+<li>Customers can have multiple contacts</li>
+<li>Each contact can be associated with a specific location</li>
+<li>Customer types and statuses are customizable</li>
+</ul>
+---
+
+<h3>1.2 Quote Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Sent → [Ordered <table><thead><tr><th>Partial</th><th>Lost</th><th>Cancelled</th></tr></thead><tbody></tbody></table> Expired]
+</code></pre>
+
+<strong>Status Definitions:</strong>
+<ul><li><strong>Draft</strong>: Quote being prepared</li>
+<li><strong>Sent</strong>: Quote sent to customer</li>
+<li><strong>Ordered</strong>: Fully converted to sales order</li>
+<li><strong>Partial</strong>: Partially converted to sales order</li>
+<li><strong>Lost</strong>: Opportunity lost to competitor</li>
+<li><strong>Cancelled</strong>: Quote cancelled</li>
+<li><strong>Expired</strong>: Quote past expiration date</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Customer: Required</li>
+<li>Customer location, contact: Optional</li>
+<li>Due date, expiration date: Optional dates</li>
+<li>Currency code: Optional (inherits from customer if not set)</li>
+<li>Exchange rate: Optional numeric</li>
+<li>Digital quote acceptance requires name and email</li>
+</ul>
+<strong>Quote Line Validation:</strong>
+<ul><li>Item/Part: Required</li>
+<li>Status: Required (Not Started, In Progress, Complete, No Quote)</li>
+<li>Description: Required (min 1 character)</li>
+<li>Method type: Required (Buy, Make, Buy and Make, Outside)</li>
+<li>Unit of measure: Required</li>
+<li>Quantity: Array of quantities (min 0.00001)</li>
+<li>Tax percent: 0-1 range</li>
+</ul>
+<strong>Quote Line Status Workflow:</strong>
+<pre><code class="language-">Not Started → In Progress → [Complete | No Quote]
+</code></pre>
+
+<strong>Discount System:</strong>
+<ul><li>Discounts applied at quote line price level (per quantity break)</li>
+<li>Each quantity can have its own discount percentage</li>
+<li>Net price = Unit price × (1 - Discount percent)</li>
+<li><strong>IMPORTANT</strong>: Discounts are NOT propagated to sales orders or invoices</li>
+</ul>
+<strong>Quote Operations:</strong>
+
+<strong>Inside Operations (Manufacturing):</strong>
+<ul><li>Setup unit, time: Required</li>
+<li>Labor unit, time: Required</li>
+<li>Machine unit, time, rate: Required</li>
+<li>Overhead rate: Required</li>
+<li>Labor rate: Required</li>
+</ul>
+<strong>Outside Operations (Subcontracting):</strong>
+<ul><li>Minimum cost: Required</li>
+<li>Unit cost: Required</li>
+<li>Lead time: Required</li>
+<li>Supplier process: Optional</li>
+</ul>
+<strong>Quote Materials:</strong>
+<ul><li>Item type validation: Part, Material, Tool, Consumable all require itemId</li>
+<li>Quantity: Min 0</li>
+<li>Unit cost: Min 0</li>
+<li>Kit flag: Boolean</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Quote creation generates unique quote ID from sequence</li>
+<li>Quote line status changes don't auto-update quote status</li>
+<li>Quote finalization can send email notification to customer contact</li>
+</ul>
+---
+
+<h3>1.3 Sales Order Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Needs Approval → [To Ship and Invoice <table><thead><tr><th>To Ship</th></tr></thead><tbody></tbody></table> To Invoice] → Completed → Closed
+                    ↓
+                Cancelled
+</code></pre>
+
+<strong>Status Definitions:</strong>
+<ul><li><strong>Draft</strong>: Order being prepared</li>
+<li><strong>Needs Approval</strong>: Requires management approval</li>
+<li><strong>To Ship and Invoice</strong>: Both shipping and invoicing pending</li>
+<li><strong>To Ship</strong>: Only shipping pending</li>
+<li><strong>To Invoice</strong>: Only invoicing pending</li>
+<li><strong>Completed</strong>: Fully shipped and invoiced</li>
+<li><strong>Cancelled</strong>: Order cancelled</li>
+<li><strong>Closed</strong>: Order closed (administrative)</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Customer: Required</li>
+<li>Currency code: Required</li>
+<li>Location: Optional</li>
+<li>Requested date, promised date: Optional</li>
+<li>Customer reference: Optional</li>
+</ul>
+<strong>Sales Order Lines:</strong>
+<ul><li>Line type: Part, Material, Tool, Consumable, Comment, Fixed Asset</li>
+<li>Item: Required for all types except Comment and Fixed Asset</li>
+<li>Method type: Required for non-Comment lines</li>
+<li>Description: Required for Comment lines</li>
+<li>Location: Required (min 0 length)</li>
+<li>Tax percent: 0-1 range</li>
+<li>Quantity, unit price: Numeric optional</li>
+</ul>
+<strong>Line Type Specific Rules:</strong>
+<ul><li><strong>Part</strong>: itemId required</li>
+<li><strong>Comment</strong>: description required, no itemId</li>
+<li><strong>Fixed Asset</strong>: assetId potentially required</li>
+<li><strong>All others</strong>: itemId required</li>
+</ul>
+<strong>Drop Shipment:</strong>
+<ul><li>When enabled, requires supplier and location</li>
+<li>Cannot have both location and drop shipment flag</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Sales order creation generates unique order ID from sequence</li>
+<li>Confirming order can send email notification</li>
+<li>Releasing order creates shipment/invoice records</li>
+<li>Completing order updates inventory and accounting ledgers</li>
+</ul>
+---
+
+<h3>1.4 RFQ (Request for Quote) Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Ready for Quote → Quoted → Closed
+</code></pre>
+
+<strong>Validation Rules:</strong>
+<ul><li>Customer: Required</li>
+<li>RFQ date: Required</li>
+<li>Status: Optional (defaults to Draft)</li>
+<li>Sales person: Optional</li>
+</ul>
+<strong>RFQ Lines:</strong>
+<ul><li>Customer part ID: Required</li>
+<li>Customer part revision: Optional</li>
+<li>Item ID: Optional (linked to internal item)</li>
+<li>Description: Optional</li>
+<li>Quantity: Array of quantities (min 0.00001)</li>
+<li>Unit of measure: Required</li>
+<li>Model upload: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>RFQ creation generates unique RFQ ID</li>
+<li>Can create quote from RFQ (copies lines and details)</li>
+</ul>
+---
+
+<h2>2. PURCHASING MODULE</h2>
+
+<h3>2.1 Supplier Management</h3>
+
+<strong>Validation Rules:</strong>
+<ul><li>Name: Required (min 1 character)</li>
+<li>Supplier status, type: Optional</li>
+<li>Account manager: Optional</li>
+<li>Currency code: Optional</li>
+<li>Purchasing/invoicing contacts: Optional</li>
+<li>Website: Optional</li>
+</ul>
+<strong>Supplier Process:</strong>
+<ul><li>Supplier: Required</li>
+<li>Process: Required</li>
+<li>Minimum cost: Min 0</li>
+<li>Lead time: Min 0 days</li>
+</ul>
+<strong>Business Constraints:</strong>
+<ul><li>Suppliers can have multiple locations</li>
+<li>Suppliers can have multiple contacts</li>
+<li>Supplier processes define capabilities and pricing</li>
+<li>Payment terms can be customized per supplier</li>
+</ul>
+---
+
+<h3>2.2 Supplier Quote Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Active → [Expired <table><thead><tr><th>Declined</th></tr></thead><tbody></tbody></table> Cancelled]
+</code></pre>
+
+<strong>Validation Rules:</strong>
+<ul><li>Supplier: Required</li>
+<li>Quote type: Purchase or Outside Processing</li>
+<li>Expiration date: Must be today or after</li>
+<li>Currency code: Optional</li>
+<li>Exchange rate: Optional</li>
+</ul>
+<strong>Supplier Quote Lines:</strong>
+<ul><li>Item: Required</li>
+<li>Description: Required</li>
+<li>Supplier part ID: Optional</li>
+<li>Inventory UOM: Required</li>
+<li>Purchase UOM: Required</li>
+<li>Conversion factor: Optional (default 1)</li>
+<li>Quantity: Array (min 0.00001)</li>
+</ul>
+<strong>Conversion Factor System:</strong>
+<ul><li>Handles different units between inventory and purchasing</li>
+<li><strong>Formula</strong>: Inventory unit price = (Supplier unit price × Exchange rate) / Conversion factor</li>
+<li><strong>Example</strong>: Buy in cases (100 units), track in each</li>
+<li><strong>Validation</strong>: Conversion factor must be > 0</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Quote creation generates unique quote ID</li>
+<li>Finalization can send email notification to supplier</li>
+<li>Can convert supplier quote to purchase order</li>
+</ul>
+---
+
+<h3>2.3 Purchase Order Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Planned → To Review → [To Receive | To Receive and Invoice] → To Invoice → Completed
+                                                              ↓
+                                                          Rejected → Closed
+</code></pre>
+
+<strong>Status Definitions:</strong>
+<ul><li><strong>Draft</strong>: Order being prepared</li>
+<li><strong>Planned</strong>: Order planned but not submitted</li>
+<li><strong>To Review</strong>: Pending approval</li>
+<li><strong>To Receive</strong>: Awaiting receipt</li>
+<li><strong>To Receive and Invoice</strong>: Both receipt and invoice pending</li>
+<li><strong>To Invoice</strong>: Only invoice pending</li>
+<li><strong>Completed</strong>: Fully received and invoiced</li>
+<li><strong>Rejected</strong>: Order rejected</li>
+<li><strong>Closed</strong>: Order closed</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Purchase order type: Required (Purchase or Outside Processing)</li>
+<li>Supplier: Required</li>
+<li>Supplier location, contact: Optional</li>
+<li>Supplier reference: Optional</li>
+<li>Currency code, exchange rate: Optional</li>
+</ul>
+<strong>Purchase Order Lines:</strong>
+<ul><li>Line type: Part, Material, Tool, Consumable, Comment</li>
+<li>Item: Required for inventory items</li>
+<li>Conversion factor: Optional (default 1)</li>
+<li>Purchase quantity: Optional numeric</li>
+<li>Purchase UOM, Inventory UOM: Optional</li>
+<li>Location, shelf: Optional</li>
+<li>Promised date: Optional</li>
+<li>Job/operation linkage: Optional (for outside processing)</li>
+</ul>
+<strong>Line Type Validation:</strong>
+<ul><li>Part, Material, Tool, Consumable: Require itemId</li>
+</ul>
+<strong>Drop Shipment:</strong>
+<ul><li>When enabled, requires customer and location</li>
+<li>Cannot have both receiving location and drop shipment</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>PO creation generates unique PO ID from sequence</li>
+<li>Finalizing can send email to supplier contact</li>
+<li>Receiving creates receipt and updates inventory</li>
+<li>Invoicing creates AP entries</li>
+</ul>
+---
+
+<h2>3. PRODUCTION MODULE</h2>
+
+<h3>3.1 Job Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Planned → Ready → In Progress ⇄ Paused → Completed
+                                  ↓
+                              Cancelled
+</code></pre>
+
+<strong>Status Definitions:</strong>
+<ul><li><strong>Draft</strong>: Job being created</li>
+<li><strong>Planned</strong>: Job planned but not released</li>
+<li><strong>Ready</strong>: Released and ready for production</li>
+<li><strong>In Progress</strong>: Active production</li>
+<li><strong>Paused</strong>: Temporarily stopped</li>
+<li><strong>Completed</strong>: Production finished</li>
+<li><strong>Cancelled</strong>: Job cancelled</li>
+</ul>
+<strong>Deadline Types:</strong>
+<ul><li><strong>ASAP</strong>: Highest priority</li>
+<li><strong>Hard Deadline</strong>: Must meet date</li>
+<li><strong>Soft Deadline</strong>: Target date</li>
+<li><strong>No Deadline</strong>: No time constraint</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Item: Required</li>
+<li>Deadline type: Required</li>
+<li>Due date: Required for Hard/Soft deadlines</li>
+<li>Location: Required</li>
+<li>Quantity: Min 0</li>
+<li>Scrap quantity: Min 0</li>
+<li>Unit of measure: Required</li>
+<li>Customer: Optional</li>
+<li>Start date: Optional</li>
+<li>Model upload, configuration: Optional</li>
+</ul>
+<strong>Bulk Job Creation:</strong>
+<ul><li>Total quantity: Required</li>
+<li>Quantity per job: Required</li>
+<li>Scrap quantity per job: Required</li>
+<li>Due date of first/last job: Required for Hard/Soft deadlines</li>
+<li><strong>Validation</strong>: First due date must be ≤ Last due date</li>
+</ul>
+<strong>Job Operations:</strong>
+
+<strong>Inside Operations:</strong>
+<ul><li>Work center: Optional (Required when job is released)</li>
+<li>Process: Required</li>
+<li>Setup/Labor/Machine unit and time: Required</li>
+<li>Machine/Overhead/Labor rate: Required</li>
+</ul>
+<strong>Outside Operations:</strong>
+<ul><li>Supplier process: Required when released</li>
+<li>Minimum cost: Required</li>
+<li>Unit cost: Required</li>
+<li>Lead time: Required</li>
+</ul>
+<strong>Job Materials:</strong>
+<ul><li>Item: Required</li>
+<li>Item type: Part, Material, Tool, Consumable</li>
+<li>Method type: Buy, Make, etc.</li>
+<li>Quantity: Min 0</li>
+<li>Unit cost: Min 0</li>
+<li>Operation linkage: Optional (Required for released jobs)</li>
+<li>Shelf: Optional</li>
+<li>Kit flag: Boolean</li>
+<li>Tracking flags: Serial, Batch</li>
+</ul>
+<strong>Job Completion:</strong>
+<ul><li>Quantity complete: Min 0</li>
+<li>Sales order line linkage: Optional</li>
+<li>Location, shelf: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Job creation generates unique job ID from sequence</li>
+<li>Releasing job creates make method from item</li>
+<li>Releasing job triggers MRP recalculation</li>
+<li>Completing job creates inventory transactions</li>
+<li>Job completion updates sales order status</li>
+<li>Job materials create demand in MRP</li>
+</ul>
+---
+
+<h3>3.2 Production Planning</h3>
+
+<strong>MRP (Material Requirements Planning):</strong>
+<ul><li>Runs automatically every 3 hours</li>
+<li>Can be triggered manually</li>
+<li>Scope: Company, Location, Job, Sales Order, Item, Purchase Order</li>
+<li>Creates/updates demand and supply forecasts</li>
+<li>Tracks actual demand from sales orders and job materials</li>
+<li>Tracks actual supply from production orders and purchase orders</li>
+</ul>
+<strong>Demand Sources:</strong>
+<ul><li>Sales orders (status: Confirmed, To Ship and Invoice, To Ship, To Invoice, In Progress)</li>
+<li>Job material requirements</li>
+</ul>
+<strong>Supply Sources:</strong>
+<ul><li>Production orders (status: Planned, Ready, In Progress, Paused)</li>
+<li>Purchase orders (status: Planned, To Receive, To Receive and Invoice)</li>
+</ul>
+<strong>MRP Process:</strong>
+<ul><li>Generate demand periods (default 72 weeks)</li>
+<li>Collect open orders from views</li>
+<li>Calculate demand/supply quantities by location, period, item</li>
+<li>Clear existing supply forecasts</li>
+<li>Upsert demand actual records</li>
+<li>Upsert supply actual records</li>
+<li>Track created/updated by user</li>
+</ul>
+---
+
+<h2>4. INVENTORY MODULE</h2>
+
+<h3>4.1 Item Management</h3>
+
+<strong>Item Types:</strong>
+<ul><li>Part</li>
+<li>Material</li>
+<li>Tool</li>
+<li>Consumable</li>
+</ul>
+<strong>Item Tracking Types:</strong>
+<ul><li>Inventory: Standard tracked inventory</li>
+<li>Non-Inventory: Not tracked in stock</li>
+<li>Serial: Individual serial number tracking</li>
+<li>Batch: Batch/lot number tracking</li>
+</ul>
+<strong>Replenishment Systems:</strong>
+<ul><li>Buy: Purchased from supplier</li>
+<li>Make: Manufactured internally</li>
+<li>Buy and Make: Both options available</li>
+</ul>
+<strong>Method Types:</strong>
+<ul><li>Buy: Purchase from supplier</li>
+<li>Make: Manufacture</li>
+<li>Outside: Subcontracted manufacturing</li>
+<li>Buy and Make: Combination</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Readable ID: Optional (auto-generated)</li>
+<li>Name: Required (max 255 chars)</li>
+<li>Description: Optional</li>
+<li>Replenishment system: Required</li>
+<li>Default method type: Required</li>
+<li>Item tracking type: Required</li>
+<li>Unit of measure: Required</li>
+<li>Unit cost: Optional (min 0)</li>
+<li>Posting group: Optional</li>
+</ul>
+<strong>Part/Tool Specific:</strong>
+<ul><li>Revision: Required (min 1 character)</li>
+<li>Model upload: Optional</li>
+<li>Lot size: Optional (min 0)</li>
+</ul>
+<strong>Material Specific:</strong>
+<ul><li>Material substance: Optional</li>
+<li>Material form: Optional</li>
+<li>Material type: Optional</li>
+<li>Finish, grade, dimension: Optional</li>
+<li>Sizes: Optional array</li>
+</ul>
+<strong>Costing Methods:</strong>
+<ul><li>Standard</li>
+<li>Average</li>
+<li>FIFO</li>
+<li>LIFO</li>
+</ul>
+<strong>Reordering Policies:</strong>
+<ul><li>Manual Reorder</li>
+<li>Demand-Based Reorder</li>
+<li>Fixed Reorder Quantity</li>
+<li>Maximum Quantity</li>
+</ul>
+<strong>Validation for Maximum Quantity Policy:</strong>
+<ul><li>Maximum inventory quantity must be > reorder point</li>
+</ul>
+<strong>Validation for Fixed Reorder Quantity:</strong>
+<ul><li>Reorder quantity must be > 0</li>
+</ul>
+<strong>Manufacturing Policies:</strong>
+<ul><li>Make to Stock</li>
+<li>Make to Order</li>
+</ul>
+<strong>Item Planning:</strong>
+<ul><li>Reordering policy: Required</li>
+<li>Reorder point: Optional (min 0)</li>
+<li>Reorder quantity: Optional (min 0)</li>
+<li>Maximum inventory quantity: Optional (min 0)</li>
+<li>Minimum/maximum order quantity: Optional (min 0)</li>
+<li>Order multiple: Optional (min 1)</li>
+<li>Demand accumulation period: Optional (min 1)</li>
+<li>Safety stock: Optional (min 0)</li>
+</ul>
+<strong>Configuration Parameters:</strong>
+<ul><li>Label: Required</li>
+<li>Data type: text, numeric, boolean, list, date, material</li>
+<li>List options: Required for "list" type</li>
+<li>Key: Must be lowercase and underscore separated</li>
+<li>Configuration parameter group: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Item creation auto-generates readable ID if not provided</li>
+<li>Part/Tool creation auto-creates makeMethod record</li>
+<li>All items auto-create itemCost, itemReplenishment, itemUnitSalePrice records</li>
+<li>Revision system: Multiple items can share readableId with different revisions</li>
+<li><strong>Readable ID with revision</strong> = readableId + (revision != '0' ? '.' + revision : '')</li>
+</ul>
+---
+
+<h3>4.2 Inventory Transactions</h3>
+
+<strong>Item Ledger Types:</strong>
+<ul><li>Purchase</li>
+<li>Sale</li>
+<li>Positive Adjmt. (Adjustment)</li>
+<li>Negative Adjmt.</li>
+<li>Transfer</li>
+<li>Consumption</li>
+<li>Output</li>
+<li>Assembly Consumption</li>
+<li>Assembly Output</li>
+</ul>
+<strong>Item Ledger Document Types:</strong>
+<ul><li>Sales Shipment, Invoice, Return Receipt, Credit Memo</li>
+<li>Purchase Receipt, Invoice, Return Shipment, Credit Memo</li>
+<li>Transfer Shipment, Receipt</li>
+<li>Service Shipment, Invoice, Credit Memo</li>
+<li>Posted Assembly</li>
+<li>Inventory Receipt, Shipment</li>
+<li>Direct Transfer</li>
+</ul>
+<strong>Inventory Adjustment:</strong>
+<ul><li>Item: Required</li>
+<li>Location: Required</li>
+<li>Shelf: Optional</li>
+<li>Adjustment type: Ledger types + "Set Quantity"</li>
+<li>Quantity: Numeric (can be negative)</li>
+<li>Tracked entity: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>All inventory transactions create item ledger entries</li>
+<li>Ledger entries update on-hand quantities</li>
+<li>Tracked entity transactions link serial/batch numbers</li>
+<li>Cost ledger entries created for valuation</li>
+</ul>
+---
+
+<h3>4.3 Receipts & Shipments</h3>
+
+<strong>Receipt Status Workflow:</strong>
+<pre><code class="language-">Draft → Pending → Posted
+</code></pre>
+
+<strong>Receipt Source Documents:</strong>
+<ul><li>Purchase Order</li>
+<li>Purchase Invoice</li>
+<li>Inbound Transfer</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Receipt ID: Required</li>
+<li>Location: Optional</li>
+<li>Source document: Optional enum</li>
+<li>Source document ID: Required</li>
+<li>External document ID: Optional</li>
+<li>Supplier: Optional</li>
+</ul>
+<strong>Shipment Status Workflow:</strong>
+<pre><code class="language-">Draft → Pending → Posted → Voided
+</code></pre>
+
+<strong>Shipment Source Documents:</strong>
+<ul><li>Sales Order</li>
+<li>Purchase Order (returns)</li>
+<li>Outbound Transfer</li>
+</ul>
+<strong>Shipment Carriers:</strong>
+<ul><li>UPS</li>
+<li>FedEx</li>
+<li>USPS</li>
+<li>DHL</li>
+<li>Other</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Shipment ID: Required</li>
+<li>Location: Optional</li>
+<li>Source document: Optional enum</li>
+<li>Source document ID: Required</li>
+<li>Tracking number: Optional</li>
+<li>Shipping method: Optional</li>
+<li>Customer: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Posting receipt creates item ledger entries</li>
+<li>Posting receipt updates purchase order status</li>
+<li>Posting shipment creates item ledger entries</li>
+<li>Posting shipment updates sales order status</li>
+<li>Shipment creates accounts receivable entries</li>
+<li>Receipt creates accounts payable entries</li>
+</ul>
+---
+
+<h3>4.4 Warehouse Transfers</h3>
+
+<strong>Transfer Status Workflow:</strong>
+<pre><code class="language-">Draft → To Ship and Receive → [To Ship | To Receive] → Completed
+                          ↓
+                      Cancelled
+</code></pre>
+
+<strong>Validation Rules:</strong>
+<ul><li>From location: Required</li>
+<li>To location: Required</li>
+<li><strong>From and To locations must be different</strong></li>
+<li>Transfer date: Optional</li>
+<li>Expected receipt date: Optional</li>
+<li>Notes, reference: Optional</li>
+</ul>
+<strong>Transfer Lines:</strong>
+<ul><li>Transfer ID: Required</li>
+<li>Item: Required</li>
+<li>Quantity: Min 0.0001</li>
+<li>From/To locations: Required (must be different)</li>
+<li>From/To shelf: Optional</li>
+<li>Unit of measure: Optional</li>
+<li>Notes: Optional</li>
+</ul>
+<strong>Stock Transfer (Internal Movement):</strong>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Draft → Released → In Progress → Completed
+</code></pre>
+
+<strong>Validation Rules:</strong>
+<ul><li>Location: Required</li>
+<li>Lines: JSON array of line items (min 1 line)</li>
+</ul>
+<strong>Stock Transfer Lines:</strong>
+<ul><li>Item: Required</li>
+<li>From shelf, To shelf: Optional</li>
+<li>Quantity: Min 0</li>
+<li>Picked quantity: Optional</li>
+<li>Batch/Serial tracking flags: Boolean</li>
+</ul>
+<strong>Stock Transfer Scanning:</strong>
+<ul><li>Item: Required</li>
+<li>Location: Required</li>
+<li>Stock transfer: Required</li>
+<li>Tracked entity: Required</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Completing transfer creates item ledger entries</li>
+<li>Transfer creates outbound and inbound transactions</li>
+<li>Stock transfer updates shelf locations</li>
+<li>Tracked entity scanning validates serial/batch numbers</li>
+</ul>
+---
+
+<h3>4.5 Tracked Entities & Traceability</h3>
+
+<strong>Tracked Entity Status:</strong>
+<ul><li>Available: Ready for use</li>
+<li>Consumed: Used in production</li>
+<li>On Hold: Quality hold</li>
+<li>Reserved: Reserved for order</li>
+</ul>
+<strong>Tracked Entity Structure:</strong>
+<ul><li>ID: Auto-generated (xid)</li>
+<li>Quantity: Current quantity</li>
+<li>Status: Enum (see above)</li>
+<li>Source document: Document type that created entity</li>
+<li>Source document ID: Specific revision UUID</li>
+<li>Source document readable ID: Base readable ID</li>
+<li>Attributes: JSONB (serial number, batch number, dates, custom properties)</li>
+</ul>
+<strong>Tracked Activity:</strong>
+<ul><li>Represents transformations/processes</li>
+<li>Type: Manufacturing, Assembly, Conversion</li>
+<li>Source document: Job, operation, etc.</li>
+<li>Attributes: Additional metadata</li>
+</ul>
+<strong>Traceability Graph:</strong>
+<ul><li><strong>Nodes</strong>: Tracked entities</li>
+<li><strong>Edges</strong>: Tracked activities with inputs/outputs</li>
+<li>Forms directed acyclic graph (DAG)</li>
+<li><strong>Forward tracing</strong>: Where did this material go?</li>
+<li><strong>Backward tracing</strong>: Where did this come from?</li>
+</ul>
+<strong>Graph Traversal:</strong>
+<ul><li><code>get_direct_descendants_of_tracked_entity_strict()</code> - Forward tracing</li>
+<li><code>get_direct_ancestors_of_tracked_entity_strict()</code> - Backward tracing</li>
+</ul>
+<strong>Conversion Pattern:</strong>
+<ul><li>Create tracked activity (transformation)</li>
+<li>Create tracked activity inputs (consumed entities)</li>
+<li>Create tracked activity outputs (produced entities)</li>
+<li>Update item ledgers (deduct inputs, add outputs)</li>
+<li>Update entity statuses (inputs → Consumed, outputs → Available)</li>
+</ul>
+---
+
+<h3>4.6 Kanban System</h3>
+
+<strong>Replenishment Systems:</strong>
+<ul><li>Buy: Purchase from supplier</li>
+<li>Make: Manufacture internally</li>
+<li>Buy and Make: Not yet implemented</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Item: Required</li>
+<li>Replenishment system: Required (default "Buy")</li>
+<li>Quantity: Integer min 1</li>
+<li>Location: Required</li>
+<li>Shelf: Optional</li>
+<li>Supplier: Required for "Buy" system</li>
+<li>Purchase UOM, conversion factor: Optional</li>
+</ul>
+<strong>Kanban Actions:</strong>
+<ul><li><strong>Order/Create</strong>: Creates job (Make) or PO (Buy)</li>
+<li><strong>Start</strong>: Starts next operation (Make only)</li>
+<li><strong>Complete</strong>: Completes current operation (Make only)</li>
+</ul>
+<strong>QR Code Integration:</strong>
+<ul><li>Three QR code types per kanban (order, start, complete)</li>
+<li>QR codes link to API endpoints</li>
+<li>Label PDF generation (2×3 grid, 6 labels per page)</li>
+<li>Includes item info, location, quantity, supplier</li>
+</ul>
+<strong>Make Kanban Side Effects:</strong>
+<ul><li>Creates production job with auto-generated ID</li>
+<li>Copies quantity, location, shelf from kanban</li>
+<li>Creates job method from item</li>
+<li>Associates kanban with job</li>
+<li>Optional auto-release (triggers MRP, scheduling)</li>
+<li>Optional auto-start (redirects to MES)</li>
+</ul>
+<strong>Buy Kanban Side Effects:</strong>
+<ul><li>Finds or creates draft PO for supplier</li>
+<li>Adds PO line with kanban quantity</li>
+<li>Uses supplier pricing or item cost</li>
+<li>Sets location/shelf from kanban or defaults</li>
+</ul>
+<strong>Collision Handling:</strong>
+<ul><li>Prevents duplicate jobs for same kanban</li>
+<li>Redirects to existing job if already active</li>
+</ul>
+---
+
+<h2>5. QUALITY MODULE</h2>
+
+<h3>5.1 Non-Conformance (Issue) Management</h3>
+
+<strong>Status Workflow:</strong>
+<pre><code class="language-">Registered → In Progress → Closed
+          ↓ (can reopen)
+</code></pre>
+
+<strong>Priority Levels:</strong>
+<ul><li>Low</li>
+<li>Medium</li>
+<li>High</li>
+<li>Critical</li>
+</ul>
+<strong>Source Types:</strong>
+<ul><li>Internal</li>
+<li>External</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Name: Required</li>
+<li>Priority: Required (enum)</li>
+<li>Source: Required (Internal/External)</li>
+<li>Location: Required</li>
+<li>Non-conformance type: Required</li>
+<li>Open date: Required</li>
+<li>Due date: Optional</li>
+<li>Close date: Optional</li>
+<li>Description: Optional</li>
+<li>Required action IDs: Optional array</li>
+<li>Approval requirements: Optional array (MRB)</li>
+<li>Workflow: Optional</li>
+<li>Quantity: Optional</li>
+</ul>
+<strong>Association Types:</strong>
+<ul><li>Items</li>
+<li>Customers</li>
+<li>Suppliers</li>
+<li>Job operations</li>
+<li>Purchase order lines</li>
+<li>Sales order lines</li>
+<li>Shipment lines</li>
+<li>Receipt lines</li>
+<li>Tracked entities</li>
+</ul>
+<strong>Task Types:</strong>
+
+<strong>1. Investigation Tasks:</strong>
+<ul><li>Created from investigation type IDs</li>
+<li>Status: Pending → In Progress → Completed/Skipped</li>
+<li>Examples: Root cause analysis, material analysis</li>
+</ul>
+<strong>2. Action Tasks:</strong>
+<ul><li>Created from required action IDs</li>
+<li>Status: Pending → In Progress → Completed/Skipped</li>
+<li>Examples: Corrective action, preventive action</li>
+</ul>
+<strong>3. Approval Tasks:</strong>
+<ul><li>Created from approval requirements</li>
+<li>Status: Pending → In Progress → Completed/Skipped</li>
+<li>MRB approvals create reviewer records</li>
+</ul>
+<strong>Task Status Workflow:</strong>
+<pre><code class="language-">Pending → In Progress → [Completed | Skipped]
+     ↓ (can reopen)
+</code></pre>
+
+<strong>Task Actions:</strong>
+<ul><li><strong>Start</strong>: Pending → In Progress</li>
+<li><strong>Complete</strong>: In Progress → Completed</li>
+<li><strong>Skip</strong>: Pending → Skipped (only when pending)</li>
+<li><strong>Reopen</strong>: Completed/Skipped → Pending</li>
+</ul>
+<strong>IMPORTANT NOTE:</strong>
+<ul><li>Tasks do NOT auto-start when issue goes "In Progress"</li>
+<li>All tasks remain in "Pending" until manually started</li>
+</ul>
+<strong>Disposition Types:</strong>
+<ul><li>Pending: Awaiting disposition</li>
+<li>Rework: Requires rework</li>
+<li>Scrap: Scrap material</li>
+<li>Use As Is: Accept as-is</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Issue creation calls edge function to create tasks</li>
+<li>Tasks created based on workflow configuration</li>
+<li>Issue completion requires all tasks complete</li>
+<li>Issues appear in "Used In" panel for associated items</li>
+<li>MRB approvals create reviewer records</li>
+</ul>
+---
+
+<h3>5.2 Risk Register</h3>
+
+<strong>Risk Types:</strong>
+<ul><li>Risk: Potential negative outcome</li>
+<li>Opportunity: Potential positive outcome</li>
+</ul>
+<strong>Risk Sources:</strong>
+<ul><li>Customer</li>
+<li>General</li>
+<li>Item</li>
+<li>Job</li>
+<li>Quote Line</li>
+<li>Supplier</li>
+<li>Work Center</li>
+</ul>
+<strong>Risk Status:</strong>
+<ul><li>Open: Active risk needing attention</li>
+<li>In Review: Being assessed</li>
+<li>Mitigating: Actions being taken</li>
+<li>Closed: Resolved</li>
+<li>Accepted: Risk accepted</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Title: Required</li>
+<li>Source: Required (enum)</li>
+<li>Severity: 1-5 scale</li>
+<li>Likelihood: 1-5 scale</li>
+<li>Status: Required</li>
+<li>Description: Optional</li>
+<li>Assignee: Optional</li>
+<li>Source ID: Optional (entity this risk relates to)</li>
+</ul>
+<strong>Calculated Fields:</strong>
+<ul><li><strong>Risk Score = Severity × Likelihood</strong> (auto-calculated)</li>
+</ul>
+<strong>Integration:</strong>
+<ul><li>Risks can be associated with any source entity via sourceId</li>
+<li>Item details pages show associated risks</li>
+<li>Can be integrated with any module via RiskRegister component</li>
+</ul>
+---
+
+<h3>5.3 Calibration & Gauges</h3>
+
+<strong>Gauge Status:</strong>
+<ul><li>Active</li>
+<li>Inactive</li>
+</ul>
+<strong>Gauge Calibration Status:</strong>
+<ul><li>Pending</li>
+<li>In-Calibration</li>
+<li>Out-of-Calibration</li>
+</ul>
+<strong>Gauge Role:</strong>
+<ul><li>Master: Reference standard</li>
+<li>Standard: Working standard</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Gauge type: Required</li>
+<li>Gauge role: Required</li>
+<li>Calibration interval (months): Min 1</li>
+<li>Supplier, model/serial number: Optional</li>
+<li>Date acquired: Optional</li>
+<li>Last/next calibration date: Optional</li>
+<li>Location, shelf: Optional</li>
+</ul>
+<strong>Calibration Record Validation:</strong>
+<ul><li>Gauge: Required</li>
+<li>Date calibrated: Required</li>
+<li>Supplier: Optional</li>
+<li>Temperature: -200 to 500 (optional)</li>
+<li>Humidity: 0 to 1 (optional)</li>
+<li>Approved by: Optional</li>
+<li>Measurement standard: Optional</li>
+<li>Calibration attempts: Array of reference/actual pairs</li>
+<li>Requires adjustment/repair/action: Boolean flags</li>
+<li>Notes: Optional (JSON)</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Gauge creation sets initial calibration status</li>
+<li>Calibration record creation updates gauge status</li>
+<li>Next calibration date auto-calculated from interval</li>
+<li>Out-of-calibration gauges flagged for action</li>
+</ul>
+---
+
+<h3>5.4 Quality Documents</h3>
+
+<strong>Document Status:</strong>
+<ul><li>Draft: Being created</li>
+<li>Active: In use</li>
+<li>Archived: No longer active</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Name: Required</li>
+<li>Version: Min 0</li>
+<li>Content: Optional</li>
+<li>Copy from: Optional (copy existing document)</li>
+</ul>
+<strong>Document Steps:</strong>
+<ul><li>Name: Required</li>
+<li>Description: Optional</li>
+<li>Type: Text, Numeric, Measurement, Boolean, List, Date</li>
+<li>Unit of measure: Required for Measurement type</li>
+<li>Min/max value: Optional (max must be ≥ min)</li>
+<li>List values: Required for List type (array of strings)</li>
+<li>Sort order: Optional</li>
+</ul>
+<strong>Step Type Validation:</strong>
+<ul><li><strong>Measurement</strong>: Requires unit of measure</li>
+<li><strong>List</strong>: Requires non-empty list values</li>
+<li>Min/max values: Max ≥ Min if both provided</li>
+</ul>
+---
+
+<h2>6. MAINTENANCE MODULE</h2>
+
+<strong>Dispatch Status Workflow:</strong>
+<pre><code class="language-">Open → Assigned → In Progress → [Completed | Cancelled]
+</code></pre>
+
+<strong>Dispatch Priority:</strong>
+<ul><li>Low</li>
+<li>Medium</li>
+<li>High</li>
+<li>Critical</li>
+</ul>
+<strong>Maintenance Severity:</strong>
+<ul><li>Preventive</li>
+<li>Operator Performed</li>
+<li>Support Required</li>
+<li>OEM Required</li>
+</ul>
+<strong>Maintenance Source:</strong>
+<ul><li>Scheduled</li>
+<li>Reactive</li>
+<li>Non-Conformance</li>
+</ul>
+<strong>OEE Impact:</strong>
+<ul><li>Down: Equipment unavailable</li>
+<li>Planned: Scheduled downtime</li>
+<li>Impact: Reduced efficiency</li>
+<li>No Impact: No production impact</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Status: Required</li>
+<li>Priority: Required</li>
+<li>Severity, Source, OEE Impact: Optional</li>
+<li>Work center: Optional</li>
+<li>Suspected failure mode: Optional</li>
+<li>Planned start/end time: Optional</li>
+<li>Assignee: Optional</li>
+<li>Content/description: Optional</li>
+</ul>
+<strong>Maintenance Events:</strong>
+<ul><li>Dispatch: Required</li>
+<li>Employee: Required</li>
+<li>Work center: Required</li>
+<li>Start time: Required</li>
+<li>End time: Optional (must be after start time if provided)</li>
+<li>Notes: Optional</li>
+</ul>
+<strong>Maintenance Items:</strong>
+<ul><li>Item: Required</li>
+<li>Quantity: Min 1</li>
+<li>Unit of measure: Required</li>
+<li>Unit cost: Min 0 (optional)</li>
+</ul>
+<strong>Maintenance Schedule:</strong>
+<ul><li>Name: Required</li>
+<li>Work center: Required</li>
+<li>Frequency: Daily, Weekly, Monthly, Quarterly, Annual</li>
+<li>Priority: Required</li>
+<li>Estimated duration: Optional numeric</li>
+<li>Active: Boolean flag</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Dispatch creation can auto-create tasks</li>
+<li>Completing dispatch creates maintenance history</li>
+<li>Maintenance events track labor hours</li>
+<li>Item consumption updates inventory</li>
+</ul>
+---
+
+<h2>7. ACCOUNTING MODULE</h2>
+
+<h3>7.1 Chart of Accounts</h3>
+
+<strong>Account Types:</strong>
+<ul><li>Posting: Regular posting account</li>
+<li>Total: Summarizes other accounts</li>
+<li>Begin Total: Starts summary range</li>
+<li>End Total: Ends summary range</li>
+</ul>
+<strong>Income/Balance Types:</strong>
+<ul><li>Balance Sheet: Asset, Liability, Equity</li>
+<li>Income Statement: Revenue, Expense</li>
+</ul>
+<strong>Account Classes:</strong>
+<ul><li>Asset</li>
+<li>Liability</li>
+<li>Equity</li>
+<li>Revenue</li>
+<li>Expense</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Number: Required (cannot start/end with dot, no consecutive dots)</li>
+<li>Name: Required</li>
+<li>Type: Required</li>
+<li>Income/Balance: Required</li>
+<li>Class: Required</li>
+<li>Consolidated rate: Average, Current, Historical</li>
+<li>Direct posting: Boolean</li>
+<li>Account category: Required for Posting accounts</li>
+</ul>
+<strong>Business Constraints:</strong>
+<ul><li>Asset, Liability, Equity must be Balance Sheet accounts</li>
+<li>Revenue, Expense must be Income Statement accounts</li>
+<li>Non-total accounts require account category</li>
+<li>Account subcategories must belong to parent category</li>
+</ul>
+<strong>Consolidated Rate Types:</strong>
+<ul><li>Average: Use average exchange rate</li>
+<li>Current: Use current exchange rate</li>
+<li>Historical: Use historical rate</li>
+</ul>
+---
+
+<h3>7.2 Journal Entries</h3>
+
+<strong>Document Types:</strong>
+<ul><li>Receipt</li>
+<li>Invoice</li>
+<li>Credit Memo</li>
+<li>Blanket Order</li>
+<li>Return Order</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Posting date: Optional</li>
+<li>Account number: Required</li>
+<li>Description: Optional</li>
+<li>Amount: Required numeric</li>
+<li>Document type: Optional enum</li>
+<li>Document ID: Optional</li>
+<li>External document ID: Optional</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Journal lines create general ledger entries</li>
+<li>Auto-balancing validation (debits = credits)</li>
+<li>Posting updates account balances</li>
+</ul>
+---
+
+<h3>7.3 Cost Ledger</h3>
+
+<strong>Cost Ledger Types:</strong>
+<ul><li>Direct Cost</li>
+<li>Revaluation</li>
+<li>Rounding</li>
+<li>Indirect Cost</li>
+<li>Variance</li>
+<li>Total</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Posting date: Optional</li>
+<li>Item ledger type: Required</li>
+<li>Cost ledger type: Required</li>
+<li>Adjustment: Boolean</li>
+<li>Document type: Optional</li>
+<li>Document ID: Optional</li>
+<li>Item: Required</li>
+<li>Quantity: Required numeric</li>
+<li>Cost: Required numeric</li>
+<li>Cost posted to GL: Required numeric</li>
+</ul>
+<strong>Side Effects:</strong>
+<ul><li>Cost ledger entries track inventory valuation</li>
+<li>Links to item ledger for quantity tracking</li>
+<li>Updates GL accounts based on posting group</li>
+</ul>
+---
+
+<h3>7.4 Payment Terms</h3>
+
+<strong>Calculation Methods:</strong>
+<ul><li>Net: Days from invoice date</li>
+<li>End of Month: Due at end of month + days</li>
+<li>Day of Month: Due on specific day of month</li>
+</ul>
+<strong>Validation Rules:</strong>
+<ul><li>Name: Required</li>
+<li>Days due: Min 0</li>
+<li>Days discount: Min 0</li>
+<li>Discount percentage: 0-100</li>
+<li>Calculation method: Required</li>
+</ul>
+<strong>Example:</strong>
+<ul><li>"Net 30": Due 30 days from invoice</li>
+<li>"EOM+15": Due 15 days after end of month</li>
+<li>"2/10 Net 30": 2% discount if paid within 10 days, else net 30</li>
+</ul>
+---
+
+<h3>7.5 Currency & Exchange Rates</h3>
+
+<strong>Validation Rules:</strong>
+<ul><li>Code: Required (e.g., USD, EUR, CAD)</li>
+<li>Decimal places: 0-4</li>
+<li>Exchange rate: Min 0</li>
+</ul>
+<strong>Multi-Currency Support:</strong>
+<ul><li>Base currency defined in company settings</li>
+<li>Exchange rates track conversion to base</li>
+<li>Quote/order exchange rate captured at creation</li>
+<li>Exchange rate updated timestamp tracked</li>
+</ul>
+<strong>Calculation:</strong>
+<ul><li><strong>Amount in base currency = Foreign amount × Exchange rate</strong></li>
+</ul>
+---
+
+<h2>8. CROSS-MODULE BUSINESS RULES</h2>
+
+<h3>8.1 Revision System</h3>
+
+<strong>Key Concepts:</strong>
+<ul><li>Multiple revisions per item (same readableId, different revision)</li>
+<li>Default revision is '0'</li>
+<li><strong>Readable ID with revision</strong> = readableId + (revision != '0' ? '.' + revision : '')</li>
+<li>Latest revision determined by createdAt DESC</li>
+</ul>
+<strong>Unique Constraint:</strong>
+<ul><li>(readableId, revision, companyId, type) must be unique</li>
+</ul>
+<strong>Relationships:</strong>
+<ul><li>Part/Material/Tool/Consumable tables join via readableId (not item.id)</li>
+<li>ItemCost, ItemReplenishment per specific revision (references item.id)</li>
+<li>Tracked entities reference specific revision UUID</li>
+</ul>
+<strong>Views Pattern:</strong>
+<pre><code class="language-sql">WITH latest_items AS (
+  SELECT DISTINCT ON (readableId, companyId)
+    *
+  FROM item
+  ORDER BY readableId, companyId, createdAt DESC
+)
+</code></pre>
+
+<strong>Side Effects:</strong>
+<ul><li>Each revision gets own cost, replenishment, pricing records</li>
+<li>Part/Tool revisions auto-create makeMethod</li>
+<li>Tracked entities linked to specific revision</li>
+<li>Method can be copied between revisions</li>
+</ul>
+---
+
+<h3>8.2 Make Methods (Bills of Material)</h3>
+
+<strong>Structure:</strong>
+<ul><li>Make method belongs to item</li>
+<li>Make method version controls revisions</li>
+<li>Operations define routing</li>
+<li>Materials define BOM</li>
+</ul>
+<strong>Method Types:</strong>
+<ul><li>Buy: Purchase the item</li>
+<li>Make: Manufacture the item</li>
+<li>Outside: Subcontract manufacturing</li>
+<li>Buy and Make: Both options</li>
+</ul>
+<strong>Operations:</strong>
+<ul><li>Sequential order</li>
+<li>Operation order: Pre, Post, Sequential</li>
+<li>Operation type: Inside (internal) or Outside (subcontract)</li>
+</ul>
+<strong>Materials:</strong>
+<ul><li>Item type: Part, Material, Tool, Consumable</li>
+<li>Method type: How to acquire the material</li>
+<li>Kit flag: Is this a kit of items?</li>
+<li>Operation linkage: Which operation consumes this?</li>
+</ul>
+<strong>Method Tree:</strong>
+<ul><li>Recursive structure (materials can have their own methods)</li>
+<li>Enables multi-level BOM explosion</li>
+<li>Tracks parent-child relationships</li>
+</ul>
+---
+
+<h3>8.3 Conversion Factors</h3>
+
+<strong>Purpose:</strong>
+<ul><li>Handle different units between inventory and purchasing/sales</li>
+<li>Example: Buy in cases, track in each</li>
+</ul>
+<strong>Formula:</strong>
+<ul><li><strong>Inventory unit price = (Purchase unit price × Exchange rate) / Conversion factor</strong></li>
+</ul>
+<strong>Application:</strong>
+<ul><li>Supplier quotes</li>
+<li>Purchase orders</li>
+<li>Purchase invoices</li>
+<li>Receipt lines</li>
+<li>Supplier parts</li>
+</ul>
+<strong>Validation:</strong>
+<ul><li>Conversion factor must be > 0</li>
+<li>Defaults to 1 when units are same</li>
+</ul>
+---
+
+<h3>8.4 Sequence Numbers</h3>
+
+<strong>Auto-Generated IDs:</strong>
+<ul><li>Quote ID</li>
+<li>Sales Order ID</li>
+<li>RFQ ID</li>
+<li>Purchase Order ID</li>
+<li>Supplier Quote ID</li>
+<li>Job ID</li>
+<li>Receipt ID</li>
+<li>Shipment ID</li>
+<li>Transfer ID</li>
+</ul>
+<strong>Pattern:</strong>
+<ul><li>Company-specific sequences</li>
+<li>Prefix + incrementing number</li>
+<li>Configurable format per document type</li>
+</ul>
+---
+
+<h3>8.5 Permissions & Security</h3>
+
+<strong>Permission Structure:</strong>
+<ul><li>Module-based: sales, purchasing, production, inventory, quality, accounting</li>
+<li>Action-based: view, create, update, delete</li>
+<li>Row-level security (RLS) enforces company isolation</li>
+</ul>
+<strong>Common Patterns:</strong>
+<ul><li>Employees can view within company</li>
+<li>Specific permissions required for create/update/delete</li>
+<li>API key access for external integrations</li>
+<li>Service role for system operations</li>
+</ul>
+---
+
+<h2>9. KEY AUTOMATIONS & TRIGGERS</h2>
+
+<h3>9.1 Database Triggers</h3>
+
+<strong>Item Creation:</strong>
+<ul><li>Auto-creates itemCost (default FIFO)</li>
+<li>Auto-creates itemReplenishment</li>
+<li>Auto-creates itemUnitSalePrice (default USD)</li>
+<li>For Parts/Tools: Auto-creates makeMethod</li>
+</ul>
+<strong>Inventory Posting:</strong>
+<ul><li>Receipt posting creates item ledger entries</li>
+<li>Shipment posting creates item ledger entries</li>
+<li>Inventory adjustments update on-hand quantities</li>
+<li>Cost ledger entries auto-calculate valuation</li>
+</ul>
+<strong>MRP Automation:</strong>
+<ul><li>Runs every 3 hours automatically</li>
+<li>Triggered by job release</li>
+<li>Creates demand/supply forecasts</li>
+<li>Updates planning records</li>
+</ul>
+---
+
+<h3>9.2 Cascade Deletes</h3>
+
+<strong>ON DELETE CASCADE:</strong>
+<ul><li>Company deletion cascades to all company data</li>
+<li>Item deletion cascades to cost, replenishment, planning</li>
+<li>Job deletion cascades to operations, materials</li>
+<li>Quote deletion cascades to lines, prices, methods</li>
+<li>PO deletion cascades to lines</li>
+<li>SO deletion cascades to lines</li>
+</ul>
+<strong>ON DELETE SET NULL:</strong>
+<ul><li>Item ledger tracked entity deletion</li>
+<li>User deletions in assignment fields</li>
+<li>Contact deletions in reference fields</li>
+</ul>
+---
+
+<h3>9.3 Status Workflows & Allowed Transitions</h3>
+
+<strong>Sales Order:</strong>
+<ul><li>Draft → Needs Approval</li>
+<li>Needs Approval → To Ship and Invoice | Cancelled</li>
+<li>To Ship and Invoice → To Ship <table><thead><tr><th>To Invoice</th></tr></thead><tbody></tbody></table> Completed</li>
+<li>To Ship → Completed</li>
+<li>To Invoice → Completed</li>
+<li>Completed → Closed</li>
+</ul>
+<strong>Purchase Order:</strong>
+<ul><li>Draft → Planned → To Review → To Receive</li>
+<li>To Receive → To Receive and Invoice <table><thead><tr><th>To Invoice</th></tr></thead><tbody></tbody></table> Completed</li>
+<li>To Invoice → Completed</li>
+<li>Any → Rejected → Closed</li>
+</ul>
+<strong>Job:</strong>
+<ul><li>Draft → Planned → Ready → In Progress</li>
+<li>In Progress ⇄ Paused</li>
+<li>In Progress → Completed | Cancelled</li>
+</ul>
+<strong>Quote:</strong>
+<ul><li>Draft → Sent → Ordered <table><thead><tr><th>Partial</th><th>Lost</th><th>Cancelled</th></tr></thead><tbody></tbody></table> Expired</li>
+</ul>
+---
+
+<h2>Summary</h2>
+
+<p>This comprehensive business logic documentation provides the rules, constraints, workflows, and side effects that govern the Carbon Manufacturing ERP/MES system. Understanding these rules is essential for:</p>
+
+<ul><li><strong>Developers</strong>: Implementing features correctly and maintaining data integrity</li>
+<li><strong>QA</strong>: Testing business logic and edge cases</li>
+<li><strong>Users</strong>: Understanding system behavior and workflows</li>
+<li><strong>Integrators</strong>: Building integrations that respect business rules</li>
+</ul>
+All modules work together to provide a complete manufacturing management solution with proper validation, automation, and traceability throughout the entire production lifecycle.
+
+
+  <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 0.9em;">
+    <p>Generated from Carbon Manufacturing System Documentation</p>
+    <p>To convert to PDF: Use your browser's Print function (Ctrl+P or Cmd+P) and select "Save as PDF"</p>
+  </footer>
+</body>
+</html>

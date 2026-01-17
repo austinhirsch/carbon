@@ -2,6 +2,23 @@
 
 This directory contains comprehensive documentation for the Carbon Manufacturing ERP/MES system.
 
+## 📄 Available Formats
+
+All documentation is available in multiple formats:
+
+- **Markdown** (`.md`) - Source files, best for viewing on GitHub or in VS Code
+- **HTML** (`.html`) - Styled web pages, optimized for browser viewing and PDF export
+- **PDF** - See [PDF Conversion Guide](./PDF-CONVERSION-GUIDE.md) for conversion instructions
+
+### Converting to PDF
+
+HTML files are pre-generated and optimized for PDF export. Simply:
+1. Open any `.html` file in your browser
+2. Press `Ctrl+P` (Windows/Linux) or `Cmd+P` (Mac)
+3. Select "Save as PDF"
+
+For automated conversion or command-line tools, see [PDF-CONVERSION-GUIDE.md](./PDF-CONVERSION-GUIDE.md).
+
 ## Documentation Files
 
 ### 📊 [Database Schema](./database-schema.md)
