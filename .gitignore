@@ -35,3 +35,7 @@ packages/database/supabase/seed.sql
 .env*.local
 
 .react-router
+# Download files (temporary)
+carbon-docs-changes.patch
+carbon-docs.tar.gz
+carbon-docs.zip
