@@ -39,3 +39,5 @@ packages/database/supabase/seed.sql
 carbon-docs-changes.patch
 carbon-docs.tar.gz
 carbon-docs.zip
+documentation-bundle.tar.gz
+documentation-bundle.zip
