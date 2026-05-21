@@ -5405,6 +5405,9 @@ msgstr "Teile"
 msgid "Pass"
 msgstr "Bestanden"
 
+msgid "Password"
+msgstr ""
+
 msgid "Path"
 msgstr "Pfad"
 
@@ -6903,14 +6906,23 @@ msgstr "Wird als schwacher Hintergrund hinter jeder Seite generierter PDFs angez
 msgid "Shown to the user when this rule fails."
 msgstr "Wird dem Benutzer angezeigt, wenn diese Regel fehlschlÃƒÆ’Ã‚Â¤gt."
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign in with Email"
 msgstr "Mit E-Mail anmelden"
 
 msgid "Sign in with Google"
 msgstr "Mit Google anmelden"
 
+msgid "Sign in with magic link instead"
+msgstr ""
+
 msgid "Sign in with Outlook"
 msgstr "Mit Outlook anmelden"
+
+msgid "Sign in with password instead"
+msgstr ""
 
 msgid "Sign Out"
 msgstr "Abmelden"

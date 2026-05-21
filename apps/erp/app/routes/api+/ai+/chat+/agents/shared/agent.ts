@@ -6,7 +6,7 @@ import { redis } from "@carbon/kv";
 import type { ChatContext } from "./context";
 import { PROFILE_PROMPT, SUGGESTION_PROMPT, TITLE_PROMPT } from "./prompts";
 
-export const memoryProvider = new RedisProvider(redis);
+export const memoryProvider = redis ? new RedisProvider(redis) : undefined;
 
 export const createAgent = (config: AgentConfig<ChatContext>) => {
   return new Agent({

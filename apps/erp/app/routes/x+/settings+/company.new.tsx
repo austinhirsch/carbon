@@ -75,7 +75,7 @@ export async function action({ request }: ActionFunctionArgs) {
       companyId,
       locationId
     }),
-    redis.del(getPermissionCacheKey(userId))
+    redis?.del(getPermissionCacheKey(userId))
   ]);
 
   if (job.error) {

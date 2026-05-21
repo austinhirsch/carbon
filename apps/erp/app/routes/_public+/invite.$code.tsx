@@ -71,7 +71,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   if (authSession) {
-    await redis.del(getPermissionCacheKey(authSession.userId));
+    await redis?.del(getPermissionCacheKey(authSession.userId));
 
     const { data: companyRecord } = await serviceRole
       .from("company")

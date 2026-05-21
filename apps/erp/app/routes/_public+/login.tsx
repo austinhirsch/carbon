@@ -6,6 +6,7 @@ import {
   CLOUDFLARE_TURNSTILE_SITE_KEY,
   CONTROLLED_ENVIRONMENT,
   carbonClient,
+  emailAndPasswordValidator,
   error,
   magicLinkValidator,
   RATE_LIMIT
@@ -13,6 +14,7 @@ import {
 import {
   sendMagicLink,
   signInWithBypassEmail,
+  signInWithEmail,
   verifyAuthSession
 } from "@carbon/auth/auth.server";
 import {
@@ -80,23 +82,51 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   assertIsPost(request);
   const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  const ratelimit = new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(RATE_LIMIT, "1 h"),
-    analytics: true
-  });
-  const { success } = await ratelimit.limit(ip);
+  if (redis) {
+    const ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(RATE_LIMIT, "1 h"),
+      analytics: true
+    });
+    const { success } = await ratelimit.limit(ip);
 
-  if (!success) {
-    return data(
-      error(null, "Rate limit exceeded"),
-      await flash(request, error(null, "Rate limit exceeded"))
-    );
+    if (!success) {
+      return data(
+        error(null, "Rate limit exceeded"),
+        await flash(request, error(null, "Rate limit exceeded"))
+      );
+    }
   }
 
-  const validation = await validator(magicLinkValidator).validate(
-    await request.formData()
-  );
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === "password") {
+    const validation = await validator(emailAndPasswordValidator).validate(
+      formData
+    );
+
+    if (validation.error) {
+      return error(validation.error, "Invalid email or password");
+    }
+
+    const { email, password } = validation.data;
+    const authSession = await signInWithEmail(email, password);
+
+    if (!authSession) {
+      return data(
+        error(null, "Invalid email or password"),
+        await flash(request, error(null, "Invalid email or password"))
+      );
+    }
+
+    const sessionCookie = await setAuthSession(request, { authSession });
+    return redirect(formData.get("redirectTo")?.toString() || "/", {
+      headers: [["Set-Cookie", sessionCookie]]
+    });
+  }
+
+  const validation = await validator(magicLinkValidator).validate(formData);
 
   if (validation.error) {
     return error(validation.error, "Invalid email address");
@@ -191,6 +221,9 @@ export default function LoginRoute() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? undefined;
   const [mode, setMode] = useState<"login" | "signup" | "verify">("login");
+  const [loginMethod, setLoginMethod] = useState<"magic-link" | "password">(
+    "password"
+  );
   const [signupEmail, setSignupEmail] = useState<string>("");
   const [turnstileToken, setTurnstileToken] = useState<string>("");
 
@@ -294,6 +327,87 @@ export default function LoginRoute() {
               <Trans>Use a different email</Trans>
             </Button>
           </VStack>
+        ) : loginMethod === "password" ? (
+          <ValidatedForm
+            fetcher={fetcher}
+            validator={emailAndPasswordValidator}
+            method="post"
+            action="/login"
+          >
+            <Hidden name="redirectTo" value={redirectTo} type="hidden" />
+            <Hidden name="intent" value="password" type="hidden" />
+            <VStack spacing={2}>
+              {fetcher.data?.success === false && fetcher.data?.message && (
+                <Alert variant="destructive">
+                  <LuCircleAlert className="w-4 h-4" />
+                  <AlertTitle>
+                    <Trans>Authentication Error</Trans>
+                  </AlertTitle>
+                  <AlertDescription>{fetcher.data?.message}</AlertDescription>
+                </Alert>
+              )}
+
+              {hasGoogleAuth && (
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full"
+                  onClick={onSignInWithGoogle}
+                  isDisabled={fetcher.state !== "idle"}
+                  variant="secondary"
+                  leftIcon={<GoogleIcon />}
+                >
+                  <Trans>Sign in with Google</Trans>
+                </Button>
+              )}
+              {hasOutlookAuth && (
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full"
+                  onClick={onSignInWithAzure}
+                  isDisabled={fetcher.state !== "idle"}
+                  variant="secondary"
+                  leftIcon={<OutlookIcon className="size-6" />}
+                >
+                  <Trans>Sign in with Outlook</Trans>
+                </Button>
+              )}
+
+              {(hasGoogleAuth || hasOutlookAuth) && (
+                <div className="py-3 w-full">
+                  <Separator />
+                </div>
+              )}
+
+              <Input name="email" label="" placeholder={t`Email Address`} />
+              <Input
+                name="password"
+                label=""
+                placeholder={t`Password`}
+                type="password"
+              />
+
+              <Submit
+                isDisabled={fetcher.state !== "idle"}
+                isLoading={fetcher.state === "submitting"}
+                size="lg"
+                className="w-full"
+                withBlocker={false}
+              >
+                <Trans>Sign in</Trans>
+              </Submit>
+
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => setLoginMethod("magic-link")}
+              >
+                <Trans>Sign in with magic link instead</Trans>
+              </Button>
+            </VStack>
+          </ValidatedForm>
         ) : (
           <ValidatedForm
             fetcher={fetcher}
@@ -376,6 +490,15 @@ export default function LoginRoute() {
                   />
                 </div>
               )}
+
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => setLoginMethod("password")}
+              >
+                <Trans>Sign in with password instead</Trans>
+              </Button>
             </VStack>
           </ValidatedForm>
         )}

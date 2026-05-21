@@ -5405,6 +5405,9 @@ msgstr "ÃƒÂ©Ã¢â‚¬ÂºÃ‚Â¶ÃƒÂ¤Ã‚Â»Ã‚Â¶"
 msgid "Pass"
 msgstr "ÃƒÂ©Ã¢â€šÂ¬Ã…Â¡ÃƒÂ¨Ã‚Â¿Ã¢â‚¬Â¡"
 
+msgid "Password"
+msgstr ""
+
 msgid "Path"
 msgstr "ÃƒÂ¨Ã‚Â·Ã‚Â¯ÃƒÂ¥Ã‚Â¾Ã¢â‚¬Å¾"
 
@@ -6903,14 +6906,23 @@ msgstr "ÃƒÂ¤Ã‚Â½Ã…â€œÃƒÂ¤Ã‚Â¸Ã‚ÂºÃƒÂ¦Ã‚Â·
 msgid "Shown to the user when this rule fails."
 msgstr "ÃƒÂ¥Ã‚Â½Ã¢â‚¬Å“ÃƒÂ¦Ã‚Â­Ã‚Â¤ÃƒÂ¨Ã‚Â§Ã¢â‚¬Å¾ÃƒÂ¥Ã‹â€ Ã¢â€žÂ¢ÃƒÂ¥Ã‚Â¤Ã‚Â±ÃƒÂ¨Ã‚Â´Ã‚Â¥ÃƒÂ¦Ã¢â‚¬â€Ã‚Â¶ÃƒÂ¥Ã‚ÂÃ¢â‚¬ËœÃƒÂ§Ã¢â‚¬ÂÃ‚Â¨ÃƒÂ¦Ã‹â€ Ã‚Â·ÃƒÂ¦Ã‹Å“Ã‚Â¾ÃƒÂ§Ã‚Â¤Ã‚ÂºÃƒÂ£Ã¢â€šÂ¬Ã¢â‚¬Å¡"
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign in with Email"
 msgstr "ÃƒÂ§Ã¢â‚¬ÂÃ‚Â¨ÃƒÂ©Ã¢â‚¬Å¡Ã‚Â®ÃƒÂ§Ã‚Â®Ã‚Â±ÃƒÂ§Ã¢â€žÂ¢Ã‚Â»ÃƒÂ¥Ã‚Â½Ã¢â‚¬Â¢"
 
 msgid "Sign in with Google"
 msgstr "ÃƒÂ§Ã¢â‚¬ÂÃ‚Â¨ Google ÃƒÂ§Ã¢â€žÂ¢Ã‚Â»ÃƒÂ¥Ã‚Â½Ã¢â‚¬Â¢"
 
+msgid "Sign in with magic link instead"
+msgstr ""
+
 msgid "Sign in with Outlook"
 msgstr "ÃƒÂ¤Ã‚Â½Ã‚Â¿ÃƒÂ§Ã¢â‚¬ÂÃ‚Â¨ Outlook ÃƒÂ§Ã¢â€žÂ¢Ã‚Â»ÃƒÂ¥Ã‚Â½Ã¢â‚¬Â¢"
+
+msgid "Sign in with password instead"
+msgstr ""
 
 msgid "Sign Out"
 msgstr "ÃƒÂ§Ã¢â€žÂ¢Ã‚Â»ÃƒÂ¥Ã¢â‚¬Â¡Ã‚Âº"
