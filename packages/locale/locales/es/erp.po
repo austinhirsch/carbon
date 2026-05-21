@@ -5405,6 +5405,9 @@ msgstr "Piezas"
 msgid "Pass"
 msgstr "Aprobar"
 
+msgid "Password"
+msgstr ""
+
 msgid "Path"
 msgstr "Ruta"
 
@@ -6903,14 +6906,23 @@ msgstr "Se muestra como un fondo tenue detrÃƒÆ’Ã‚Â¡s de cada pÃƒÆ�
 msgid "Shown to the user when this rule fails."
 msgstr "Se muestra al usuario cuando esta regla falla."
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign in with Email"
 msgstr "Iniciar sesiÃƒÆ’Ã‚Â³n con correo electrÃƒÆ’Ã‚Â³nico"
 
 msgid "Sign in with Google"
 msgstr "Iniciar sesiÃƒÆ’Ã‚Â³n con Google"
 
+msgid "Sign in with magic link instead"
+msgstr ""
+
 msgid "Sign in with Outlook"
 msgstr "Iniciar sesiÃƒÆ’Ã‚Â³n con Outlook"
+
+msgid "Sign in with password instead"
+msgstr ""
 
 msgid "Sign Out"
 msgstr "Cerrar sesiÃƒÆ’Ã‚Â³n"

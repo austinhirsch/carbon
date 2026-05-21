@@ -239,7 +239,7 @@ export async function updateCompanySession(
   const authSession = await getAuthSession(request);
 
   if (authSession !== undefined) {
-    await redis.del(getPermissionCacheKey(authSession?.userId!));
+    await redis?.del(getPermissionCacheKey(authSession?.userId!));
     session.set(SESSION_KEY, {
       ...authSession,
       companyId,

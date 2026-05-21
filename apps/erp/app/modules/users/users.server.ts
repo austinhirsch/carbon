@@ -643,7 +643,7 @@ export async function getUserClaims(userId: string, companyId: string) {
   } | null = null;
 
   try {
-    const cachedClaims = await redis.get(getPermissionCacheKey(userId));
+    const cachedClaims = await redis?.get(getPermissionCacheKey(userId));
     if (cachedClaims) {
       claims = JSON.parse(cachedClaims) as {
         permissions: Record<string, Permission>;
@@ -670,7 +670,7 @@ export async function getUserClaims(userId: string, companyId: string) {
       claims = makePermissionsFromClaims(rawClaims.data as Json[]);
 
       // store claims in redis
-      await redis.set(getPermissionCacheKey(userId), JSON.stringify(claims));
+      await redis?.set(getPermissionCacheKey(userId), JSON.stringify(claims));
 
       if (!claims) {
         throw new Error("Failed to get claims");
@@ -1354,7 +1354,7 @@ async function setUserPermissions(
     .from("userPermission")
     .upsert({ id: userId, permissions: newPermissions });
 
-  await redis.del(getPermissionCacheKey(userId));
+  await redis?.del(getPermissionCacheKey(userId));
 
   return result;
 }
@@ -1521,7 +1521,7 @@ export async function updatePermissions(
     if (permissionsUpdate.error)
       return error(permissionsUpdate.error, "Failed to update claims");
 
-    await redis.del(getPermissionCacheKey(id));
+    await redis?.del(getPermissionCacheKey(id));
 
     return success("Permissions updated");
   } else {

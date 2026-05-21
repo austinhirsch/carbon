@@ -300,7 +300,7 @@ export const GTM_EVENTS_API_SECRET_KEY = getEnv("GTM_EVENTS_API_SECRET_KEY", {
   isSecret: true
 });
 export const REDIS_URL = getEnv("REDIS_URL", {
-  isRequired: true,
+  isRequired: false,
   isSecret: true
 });
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days;

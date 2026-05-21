@@ -5405,6 +5405,9 @@ msgstr "PiÃƒÆ’Ã‚Â¨ces"
 msgid "Pass"
 msgstr "RÃƒÆ’Ã‚Â©ussir"
 
+msgid "Password"
+msgstr ""
+
 msgid "Path"
 msgstr "Chemin"
 
@@ -6903,14 +6906,23 @@ msgstr "AffichÃƒÆ’Ã‚Â© en arriÃƒÆ’Ã‚Â¨re-plan discret sur ch
 msgid "Shown to the user when this rule fails."
 msgstr "AffichÃƒÆ’Ã‚Â© ÃƒÆ’Ã‚Â  l'utilisateur lorsque cette rÃƒÆ’Ã‚Â¨gle ÃƒÆ’Ã‚Â©choue."
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign in with Email"
 msgstr "Se connecter avec Email"
 
 msgid "Sign in with Google"
 msgstr "Se connecter avec Google"
 
+msgid "Sign in with magic link instead"
+msgstr ""
+
 msgid "Sign in with Outlook"
 msgstr "Se connecter avec Outlook"
+
+msgid "Sign in with password instead"
+msgstr ""
 
 msgid "Sign Out"
 msgstr "Se dÃƒÆ’Ã‚Â©connecter"

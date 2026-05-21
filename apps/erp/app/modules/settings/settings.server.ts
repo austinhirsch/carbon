@@ -11,14 +11,13 @@ import type { customFieldValidator } from "./settings.models";
 const INTEGRATION_CACHE_TTL = 3600;
 
 export async function clearCustomFieldsCache(companyId?: string) {
-  const keys = companyId ? `customFields:${companyId}:*` : "customFields:*";
-  redis.keys(keys).then(function (keys) {
-    const pipeline = redis.pipeline();
-    keys.forEach(function (key) {
-      pipeline.del(key);
-    });
-    return pipeline.exec();
-  });
+  if (!redis) return;
+  const pattern = companyId ? `customFields:${companyId}:*` : "customFields:*";
+  const matchedKeys = await redis.keys(pattern);
+  if (matchedKeys.length === 0) return;
+  const pipeline = redis.pipeline();
+  matchedKeys.forEach((key) => pipeline.del(key));
+  await pipeline.exec();
 }
 
 export async function clearCompanyIntegrationCache(
@@ -28,15 +27,15 @@ export async function clearCompanyIntegrationCache(
 
   try {
     // Clear both old and new key formats
-    await redis.del(cacheKey, `json:${cacheKey}`);
+    await redis?.del(cacheKey, `json:${cacheKey}`);
   } catch (error) {
     console.error("Redis cache invalidation error:", error);
   }
 }
 
 export async function clearAllIntegrationCaches(): Promise<void> {
+  if (!redis) return;
   try {
-    // Clear both old and new key patterns
     const oldPattern = "integrations:*";
     const newPattern = "json:integrations:*";
 
@@ -111,7 +110,7 @@ export async function getCompanyIntegrations(
 
   try {
     // Try the new prefixed key first
-    let cached = await redis.get(`json:${cacheKey}`);
+    let cached = await redis?.get(`json:${cacheKey}`);
     if (cached && typeof cached === "string") {
       try {
         return JSON.parse(cached);
@@ -120,12 +119,12 @@ export async function getCompanyIntegrations(
           `JSON parse error for prefixed cache key json:${cacheKey}:`,
           parseError
         );
-        await redis.del(`json:${cacheKey}`);
+        await redis?.del(`json:${cacheKey}`);
       }
     }
 
     // Fallback to old key format for backwards compatibility
-    cached = await redis.get(cacheKey);
+    cached = await redis?.get(cacheKey);
     if (cached !== null && cached !== undefined) {
       // Log the type and content for debugging
       console.log(`Cache hit for ${cacheKey}:`, {
@@ -152,7 +151,7 @@ export async function getCompanyIntegrations(
             parseError
           );
           console.error("Cached value that failed to parse:", cached);
-          await redis.del(cacheKey);
+          await redis?.del(cacheKey);
         }
       } else {
         console.warn(
@@ -160,14 +159,14 @@ export async function getCompanyIntegrations(
           typeof cached,
           cached
         );
-        await redis.del(cacheKey);
+        await redis?.del(cacheKey);
       }
     }
   } catch (error) {
     console.error("Redis cache read error:", error);
     // Clear the corrupted cache entry
     try {
-      await redis.del(cacheKey);
+      await redis?.del(cacheKey);
     } catch (deleteError) {
       console.error("Failed to delete corrupted cache entry:", deleteError);
     }
@@ -189,7 +188,7 @@ export async function getCompanyIntegrations(
     const serializedData = JSON.stringify(integrations);
     if (typeof serializedData === "string" && serializedData.length > 0) {
       // Use a prefixed key to ensure we know this is a JSON string
-      await redis.setex(
+      await redis?.setex(
         `json:${cacheKey}`,
         INTEGRATION_CACHE_TTL,
         serializedData
@@ -365,7 +364,7 @@ export async function getIntegrationHealth(
 
   const key = `integrations:${companyId}:${integration.id}:health`;
 
-  const cached = await redis.get(key);
+  const cached = await redis?.get(key);
 
   // Only cache healthy status
   if (cached === "1") {
@@ -382,7 +381,7 @@ export async function getIntegrationHealth(
     ) => Promise<boolean>
   )(companyId, integration.metadata as Record<string, any>);
 
-  await redis.set(key, status ? "1" : "0", "EX", INTEGRATION_CACHE_TTL * 5); // Cache for 5 minutes
+  await redis?.set(key, status ? "1" : "0", "EX", INTEGRATION_CACHE_TTL * 5); // Cache for 5 minutes
 
   return {
     ...integration,
@@ -419,5 +418,5 @@ export async function invalidateIntegrationHealthCache(
 ) {
   const key = `integrations:${companyId}:${integrationId}:health`;
 
-  return await redis.del(key);
+  return await redis?.del(key);
 }

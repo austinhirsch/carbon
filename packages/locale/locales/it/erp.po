@@ -5405,6 +5405,9 @@ msgstr "Parti"
 msgid "Pass"
 msgstr "Passa"
 
+msgid "Password"
+msgstr ""
+
 msgid "Path"
 msgstr "Percorso"
 
@@ -6903,14 +6906,23 @@ msgstr "Mostrato come sfondo tenue dietro ogni pagina dei PDF generati"
 msgid "Shown to the user when this rule fails."
 msgstr "Mostrato all'utente quando questa regola non riesce."
 
+msgid "Sign in"
+msgstr ""
+
 msgid "Sign in with Email"
 msgstr "Accedi con Email"
 
 msgid "Sign in with Google"
 msgstr "Accedi con Google"
 
+msgid "Sign in with magic link instead"
+msgstr ""
+
 msgid "Sign in with Outlook"
 msgstr "Accedi con Outlook"
+
+msgid "Sign in with password instead"
+msgstr ""
 
 msgid "Sign Out"
 msgstr "Esci"

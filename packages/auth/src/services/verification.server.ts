@@ -12,7 +12,7 @@ export async function sendVerificationCode(email: string) {
     ).toString();
 
     // Store in Redis with 10-minute expiration
-    await redis.set(
+    await redis?.set(
       `verification:${email.toLowerCase()}`,
       verificationCode,
       "EX",
@@ -44,14 +44,14 @@ export async function sendVerificationCode(email: string) {
 
 export async function verifyEmailCode(email: string, code: string) {
   try {
-    const storedCode = await redis.get(`verification:${email.toLowerCase()}`);
+    const storedCode = await redis?.get(`verification:${email.toLowerCase()}`);
 
     if (!storedCode || String(storedCode).trim() !== String(code).trim()) {
       return false;
     }
 
     // Delete the code after successful verification
-    await redis.del(`verification:${email.toLowerCase()}`);
+    await redis?.del(`verification:${email.toLowerCase()}`);
 
     return true;
   } catch (error) {
